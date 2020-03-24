@@ -60,6 +60,25 @@ if [ ! -d $TOOLS_PATH/wikiextractor ]; then
     git clone https://github.com/attardi/wikiextractor.git
 fi
 
+if [ ! -d $TOOLS_PATH/stanford-segmenter-* ]; then
+    curl -o stanford-segmenter-2018-10-16.zip https://nlp.stanford.edu/software/stanford-segmenter-2018-10-16.zip
+    unzip stanford-segmenter-2018-10-16.zip
+    rm stanford-segmenter-2018-10-16.zip
+    echo "Install stanford-segmenter"
+fi
+
+if [ ! -d $TOOLS_PATH/kytea-* ]; then
+    curl -o kytea-0.4.7.tar.gz http://www.phontron.com/kytea/download/kytea-0.4.7.tar.gz
+    tar -xzf kytea-0.4.7.tar.gz
+    cd kytea-0.4.7
+    ./configure
+    make
+    make install
+    cd ..
+    rm kytea-0.4.7.tar.gz
+fi
+  
+
 # # Chinese segmenter
 # if ! ls $TOOLS_PATH/stanford-segmenter-* 1> /dev/null 2>&1; then
 #   echo "Stanford segmenter not found at $TOOLS_PATH/stanford-segmenter-*"
