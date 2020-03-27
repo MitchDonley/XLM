@@ -73,7 +73,7 @@ if [ ! -d $TOOLS_PATH/kytea-* ]; then
     cd kytea-0.4.7
     ./configure
     make
-    make install
+    sudo make install
     cd ..
     rm kytea-0.4.7.tar.gz
 fi
