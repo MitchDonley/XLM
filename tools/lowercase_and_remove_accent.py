@@ -9,6 +9,9 @@ import sys
 import unicodedata
 import six
 
+# encoding=utf8
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 def convert_to_unicode(text):
     """
