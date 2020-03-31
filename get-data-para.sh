@@ -110,7 +110,7 @@ if [ $pair == "en-ru" ]; then
   # wget -c http://opus.nlpl.eu/download.php?f=OpenSubtitles2018%2Fen-ru.txt.zip -P $PARA_PATH
   # MultiUN
   wget -c http://opus.nlpl.eu/download.php?f=MultiUN%2Fen-ru.txt.zip -P $PARA_PATH
-  unzip -u download.php?f=MultiUN%2Fen-ru.txt.zip -d $PARA_PATH
+  unzip -u $PARA_PATH/download.php?f=MultiUN%2Fen-ru.txt.zip -d $PARA_PATH
 fi
 
 # en-sw
@@ -118,10 +118,10 @@ if [ $pair == "en-sw" ]; then
   echo "Download parallel data for English-Swahili"
   # Tanzil
   wget -c http://opus.nlpl.eu/download.php?f=Tanzil%2Fen-sw.txt.zip -P $PARA_PATH
-  unzip -u download.php?f=Tanzil%2Fen-sw.txt.zip -d $PARA_PATH
+  unzip -u $PARA_PATH/download.php?f=Tanzil%2Fen-sw.txt.zip -d $PARA_PATH
   # GlobalVoices
   wget -c http://opus.nlpl.eu/download.php?f=GlobalVoices%2Fen-sw.txt.zip -P $PARA_PATH
-  unzip -u download.php?f=GlobalVoices%2Fen-sw.txt.zip -d $PARA_PATH
+  unzip -u $PARA_PATH/download.php?f=GlobalVoices%2Fen-sw.txt.zip -d $PARA_PATH
 fi
 
 # en-th
