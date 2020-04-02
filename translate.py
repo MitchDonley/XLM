@@ -43,6 +43,7 @@ def get_parser():
     # model / output paths
     parser.add_argument("--model_path", type=str, default="", help="Model path")
     parser.add_argument("--output_path", type=str, default="", help="Output path")
+    parser.add_argument("--source_path", type=str, default="", help="Source path")
 
     # parser.add_argument("--max_vocab", type=int, default=-1, help="Maximum vocabulary size (-1 to disable)")
     # parser.add_argument("--min_count", type=int, default=0, help="Minimum vocabulary count")
@@ -81,9 +82,16 @@ def main(params):
 
     # read sentences from stdin
     src_sent = []
-    for line in sys.stdin.readlines():
-        assert len(line.strip().split()) > 0
-        src_sent.append(line)
+    if params.src_path is None:
+        for line in sys.stdin.readlines():
+            assert len(line.strip().split()) > 0
+            src_sent.append(line)
+    else:
+        f = open(params.src_path, 'r')
+        for line in f:
+            assert len(line.strip().split()) > 0
+            src_sent.append(line)
+
     logger.info("Read %i sentences from stdin. Translating ..." % len(src_sent))
 
     f = io.open(params.output_path, 'w', encoding='utf-8')
