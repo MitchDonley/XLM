@@ -11,7 +11,7 @@ import subprocess
 from collections import OrderedDict
 import numpy as np
 import torch
-
+import pdb
 from ..utils import to_cuda, restore_segmentation, concat_batches
 from ..model.memory import HashingMemory
 
@@ -278,7 +278,6 @@ class Evaluator(object):
         HashingMemory.EVAL_MEMORY = eval_memory
         if eval_memory:
             all_mem_att = {k: [] for k, _ in self.memory_list}
-
         for batch in self.get_iterator(data_set, lang1, lang2, stream=(lang2 is None)):
 
             # batch
@@ -297,8 +296,8 @@ class Evaluator(object):
             assert pred_mask.sum().item() == y.size(0)
 
             # cuda
-            x, lengths, positions, langs, pred_mask, y = to_cuda(x, lengths, positions, langs, pred_mask, y)
-
+            x, lengths, positions, langs, pred_mask, y = to_cuda(x, lengths, positions, langs, pred_mask, y) 
+            #print(x.shape, lengths.shape, positions.shape, pred_mask.shape, y.shape)
             # forward / loss
             tensor = model('fwd', x=x, lengths=lengths, positions=positions, langs=langs, causal=True)
             word_scores, loss = model('predict', tensor=tensor, pred_mask=pred_mask, y=y, get_scores=True)
@@ -353,9 +352,10 @@ class Evaluator(object):
         HashingMemory.EVAL_MEMORY = eval_memory
         if eval_memory:
             all_mem_att = {k: [] for k, _ in self.memory_list}
-
+        i = 0
         for batch in self.get_iterator(data_set, lang1, lang2, stream=(lang2 is None)):
-
+            # if i == 156:
+            #    pdb.set_trace()
             # batch
             if lang2 is None:
                 x, lengths = batch
@@ -370,7 +370,10 @@ class Evaluator(object):
 
             # cuda
             x, y, pred_mask, lengths, positions, langs = to_cuda(x, y, pred_mask, lengths, positions, langs)
-
+            logger.info('batch: {}\tloss: {}\t words: {}'.format(i, xe_loss, n_words))
+            logger.info('x shape: {}\t y shape: {}\t pred mask shape: {}\t lengths shape: {}\t positions shape {}'.format(x.shape, y.shape, pred_mask.shape, lengths.shape, positions.shape))
+            print('batch: {}'.format(i))
+            print(x.shape, y.shape, pred_mask.shape, lengths.shape, positions.shape)
             # forward / loss
             tensor = model('fwd', x=x, lengths=lengths, positions=positions, langs=langs, causal=False)
             word_scores, loss = model('predict', tensor=tensor, pred_mask=pred_mask, y=y, get_scores=True)
@@ -379,6 +382,7 @@ class Evaluator(object):
             n_words += len(y)
             xe_loss += loss.item() * len(y)
             n_valid += (word_scores.max(1)[1] == y).sum().item()
+            i += 1
             if eval_memory:
                 for k, v in self.memory_list:
                     all_mem_att[k].append((v.last_indices, v.last_scores))

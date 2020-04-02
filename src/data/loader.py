@@ -9,7 +9,7 @@ from logging import getLogger
 import os
 import numpy as np
 import torch
-
+import pdb
 from .dataset import StreamDataset, Dataset, ParallelDataset
 from .dictionary import BOS_WORD, EOS_WORD, PAD_WORD, UNK_WORD, MASK_WORD
 
@@ -144,9 +144,9 @@ def load_mono_data(params, data):
                 dataset = Dataset(mono_data['sentences'], mono_data['positions'], params)
 
                 # remove empty and too long sentences
-                if splt == 'train':
-                    dataset.remove_empty_sentences()
-                    dataset.remove_long_sentences(params.max_len)
+                #if splt == 'train':
+                dataset.remove_empty_sentences()
+                dataset.remove_long_sentences(params.max_len)
 
                 # if there are several processes on the same machine, we can split the dataset
                 if splt == 'train' and params.n_gpu_per_node > 1 and params.split_data:
@@ -204,9 +204,9 @@ def load_para_data(params, data):
             )
 
             # remove empty and too long sentences
-            if splt == 'train':
-                dataset.remove_empty_sentences()
-                dataset.remove_long_sentences(params.max_len)
+            #if splt == 'train':
+            dataset.remove_empty_sentences()
+            dataset.remove_long_sentences(params.max_len)
 
             # for validation and test set, enumerate sentence per sentence
             if splt != 'train':
@@ -336,6 +336,7 @@ def load_data(params):
     # parallel datasets
     load_para_data(params, data)
 
+    #pdb.set_trace()
     # monolingual data summary
     logger.info('============ Data summary')
     for lang, v in data['mono_stream'].items():
