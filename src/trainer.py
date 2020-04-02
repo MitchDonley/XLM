@@ -16,7 +16,7 @@ from torch import nn
 from torch.nn import functional as F
 from torch.nn.utils import clip_grad_norm_
 import apex
-
+import pdb
 from .optim import get_optimizer
 from .utils import to_cuda, concat_batches, find_modules
 from .utils import parse_lambda_config, update_lambdas
@@ -595,6 +595,7 @@ class Trainer(object):
         # stop if the stopping criterion has not improved after a certain number of epochs
         if self.stopping_criterion is not None and (self.params.is_master or not self.stopping_criterion[0].endswith('_mt_bleu')):
             metric, biggest = self.stopping_criterion
+            #pdb.set_trace()
             assert metric in scores, metric
             factor = 1 if biggest else -1
             if factor * scores[metric] > factor * self.best_stopping_criterion:

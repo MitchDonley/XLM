@@ -8,6 +8,7 @@
 import json
 import random
 import argparse
+import pdb
 
 from src.slurm import init_signal_handler, init_distributed_mode
 from src.data.loader import check_data_params, load_data
@@ -292,6 +293,7 @@ def main(params):
         logger.info("============ End of epoch %i ============" % trainer.epoch)
 
         # evaluate perplexity
+        # pdb.set_trace()
         scores = evaluator.run_all_evals(trainer)
 
         # print / JSON log
