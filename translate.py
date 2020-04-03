@@ -39,11 +39,11 @@ def get_parser():
     parser.add_argument("--exp_name", type=str, default="", help="Experiment name")
     parser.add_argument("--exp_id", type=str, default="", help="Experiment ID")
     parser.add_argument("--batch_size", type=int, default=32, help="Number of sentences per batch")
-
+    parser.add_argument("--data_size", type=int, default=1000000, help="Number of sentences to translate")
     # model / output paths
     parser.add_argument("--model_path", type=str, default="", help="Model path")
     parser.add_argument("--output_path", type=str, default="", help="Output path")
-    parser.add_argument("--source_path", type=str, default="", help="Source path")
+    parser.add_argument("--src_path", type=str, default="", help="Source path")
 
     # parser.add_argument("--max_vocab", type=int, default=-1, help="Maximum vocabulary size (-1 to disable)")
     # parser.add_argument("--min_count", type=int, default=0, help="Minimum vocabulary count")
@@ -87,10 +87,16 @@ def main(params):
             assert len(line.strip().split()) > 0
             src_sent.append(line)
     else:
+        i = 0
         f = open(params.src_path, 'r')
         for line in f:
-            assert len(line.strip().split()) > 0
-            src_sent.append(line)
+            if i > params.data_size:
+                break
+            #print(line)
+            #print('\n')
+            if len(line.strip().split()) > 0 and len(line.strip().split()) < 256:
+                src_sent.append(line)
+                i += 1
 
     logger.info("Read %i sentences from stdin. Translating ..." % len(src_sent))
 
