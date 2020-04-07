@@ -96,7 +96,7 @@ class Evaluator(object):
         # create directory to store hypotheses, and reference files for BLEU evaluation
         if self.params.is_master:
             params.hyp_path = os.path.join(params.dump_path, 'hypotheses')
-            subprocess.Popen('mkdir -p %s' % params.hyp_path, shell=True).wait()
+            subprocess.Popen('mkdir -p "%s"' % params.hyp_path, shell=True).wait()
             self.create_reference_files()
 
     def get_iterator(self, data_set, lang1, lang2=None, stream=False):

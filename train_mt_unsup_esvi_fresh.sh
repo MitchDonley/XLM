@@ -1,0 +1,25 @@
+python -W ignore train.py --exp_name unsupMT_esvi_test \
+--dump_path "/content/gdrive/My Drive/NLP-Project/dumped/" \
+--data_path ./data/mono_es_vi/processed/ \
+--lgs 'es-vi' \
+--ae_steps 'es,vi' \
+--bt_steps 'es-vi-es,vi-es-vi' \
+--word_shuffle 3 \
+--word_dropout 0.1 \
+--word_blank 0.1 \
+--lambda_ae '0:1,100000:0.1,300000:0' \
+--encoder_only false \
+--emb_dim 1024 \
+--n_layers 6 \
+--n_heads 8 \
+--dropout 0.1 \
+--attention_dropout 0.1 \
+--gelu_activation true \
+--tokens_per_batch 500 \
+--batch_size 2 \
+--bptt 64 \
+--optimizer adam_inverse_sqrt,beta1=0.9,beta2=0.98,lr=0.0001 \
+--epoch_size 200000 \
+--eval_bleu true \
+--stopping_criterion 'valid_es-vi_mt_bleu,10' \
+--validation_metrics 'valid_es-vi_mt_bleu'
