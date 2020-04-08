@@ -184,7 +184,7 @@ fi
 # tokenize
 for lg in $(echo $pair | sed -e 's/\-/ /g'); do
   if [ ! -f $PARA_PATH/$pair.$lg.all ]; then
-    cat $PARA_PATH/*.$pair.$lg | $TOKENIZE $lg | > $PARA_PATH/$pair.$lg.all
+    cat $PARA_PATH/*.$pair.$lg  > $PARA_PATH/$pair.$lg.all
   fi
 done
 

@@ -4,7 +4,7 @@ pair=$1  # input language pair
 
 # data paths
 MAIN_PATH=$PWD
-PARA_PATH=$PWD/data/mono_es_vi
+PARA_PATH=$PWD/data/para
 
 # tools paths
 TOOLS_PATH=$PWD/tools
