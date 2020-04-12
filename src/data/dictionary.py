@@ -9,7 +9,7 @@ import os
 import numpy as np
 import torch
 from logging import getLogger
-
+import pdb
 
 logger = getLogger()
 
@@ -185,6 +185,7 @@ class Dictionary(object):
             s = line.rstrip().split()
             # skip empty sentences
             if len(s) == 0:
+                #pdb.set_trace()
                 print("Empty sentence in line %i." % i)
             # index sentence words
             count_unk = 0

@@ -16,6 +16,7 @@ vocab.txt: 1stline=word, 2ndline=count
 
 import os
 import sys
+import torch
 
 from src.logger import create_logger
 from src.data.dictionary import Dictionary
@@ -30,8 +31,11 @@ if __name__ == '__main__':
     bin_path = sys.argv[2] + '.pth'
     assert os.path.isfile(voc_path)
     assert os.path.isfile(txt_path)
-
-    dico = Dictionary.read_vocab(voc_path)
+    if voc_path[-4:] == '.pth':
+        reload = torch.load(voc_path)
+        dico = Dictionary(id2word = reload['dico_id2word'], word2id = reload['dico_word2id'], counts = reload['dico_counts'])
+    else:
+        dico = Dictionary.read_vocab(voc_path)
     logger.info("")
 
     data = Dictionary.index_data(txt_path, bin_path, dico)

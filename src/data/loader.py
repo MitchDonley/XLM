@@ -21,7 +21,9 @@ def process_binarized(data, params):
     """
     Process a binarized dataset and log main statistics.
     """
+    # pdb.set_trace()
     dico = data['dico']
+    # pdb.set_trace()
     assert ((data['sentences'].dtype == np.uint16) and (len(dico) < 1 << 16) or
             (data['sentences'].dtype == np.int32) and (1 << 16 <= len(dico) < 1 << 31))
     logger.info("%i words (%i unique) in %i sentences. %i unknown words (%i unique) covering %.2f%% of the data." % (
