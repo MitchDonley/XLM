@@ -3,7 +3,7 @@ python -W ignore train.py \
 --dump_path ./dumped/ \
 --data_path ./data/es_vi/processed/ \
 --reload_model "mlm_tlm_xnli15_1024.pth,mlm_tlm_xnli15_1024.pth" \
---lgs 'es-vi' \
+--lgs 'ar-bg-de-el-en-es-fr-hi-ru-sw-th-tr-ur-vi-zh' \
 --ae_steps 'es,vi' \
 --bt_steps 'es-vi-es,vi-es-vi' \
 --word_shuffle 3 \

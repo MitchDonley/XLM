@@ -148,6 +148,8 @@ def get_parser():
                         help="Validation metrics")
     parser.add_argument("--accumulate_gradients", type=int, default=1,
                         help="Accumulate model gradients over N iterations (N times larger batch sizes)")
+    parser.add_argument("--contrastive_loss", type=bool_flag, default=False,
+                        help="Enforce contrastive learning on encoder embeddings (only for TLM)")
 
     # training coefficients
     parser.add_argument("--lambda_mlm", type=str, default="1",

@@ -12,6 +12,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import pdb
 
 from .memory import HashingMemory
 
@@ -298,6 +299,10 @@ class TransformerModel(nn.Module):
                 assert 0 <= layer_id <= params.n_layers - 1
                 assert pos in ['in', 'after']
                 self.memories['%i_%s' % (layer_id, pos)] = HashingMemory.build(self.dim, self.dim, params)
+        
+        # contrastive loss
+        self.use_contrastive = params.contrastive_loss
+        self.contrastive = nn.Sequential(nn.Linear(self.hidden_dim, self.hidden_dim), nn.Relu(), nn.Linear(self.hidden_dim, self.hidden_dim))
 
         for layer_id in range(self.n_layers):
             self.attentions.append(MultiHeadAttention(self.n_heads, self.dim, dropout=self.attention_dropout))
@@ -340,7 +345,6 @@ class TransformerModel(nn.Module):
         """
         # lengths = (x != self.pad_index).float().sum(dim=1)
         # mask = x != self.pad_index
-
         # check inputs
         slen, bs = x.size()
         assert lengths.size(0) == bs
@@ -425,6 +429,7 @@ class TransformerModel(nn.Module):
         # move back sequence length to dimension 0
         tensor = tensor.transpose(0, 1)
 
+
         return tensor
 
     def predict(self, tensor, pred_mask, y, get_scores):
@@ -435,8 +440,12 @@ class TransformerModel(nn.Module):
             `y` is a LongTensor of shape (pred_mask.sum(),)
             `get_scores` is a boolean specifying whether we need to return scores
         """
+
         masked_tensor = tensor[pred_mask.unsqueeze(-1).expand_as(tensor)].view(-1, self.dim)
         scores, loss = self.pred_layer(masked_tensor, y, get_scores)
+
+        if self.use_contrastive:
+
         return scores, loss
 
     def generate(self, src_enc, src_len, tgt_lang_id, max_len=200, sample_temperature=None):
