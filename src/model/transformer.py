@@ -300,9 +300,9 @@ class TransformerModel(nn.Module):
                 assert pos in ['in', 'after']
                 self.memories['%i_%s' % (layer_id, pos)] = HashingMemory.build(self.dim, self.dim, params)
         
-        # contrastive loss
-        self.use_contrastive = params.contrastive_loss
-        self.contrastive = nn.Sequential(nn.Linear(self.hidden_dim, self.hidden_dim), nn.ReLU(), nn.Linear(self.hidden_dim, self.hidden_dim))
+        # # contrastive loss
+        # self.use_contrastive = params.contrastive_loss
+        # self.contrastive = nn.Sequential(nn.Linear(self.hidden_dim, self.hidden_dim), nn.ReLU(), nn.Linear(self.hidden_dim, self.hidden_dim))
 
         for layer_id in range(self.n_layers):
             self.attentions.append(MultiHeadAttention(self.n_heads, self.dim, dropout=self.attention_dropout))
@@ -444,10 +444,11 @@ class TransformerModel(nn.Module):
         masked_tensor = tensor[pred_mask.unsqueeze(-1).expand_as(tensor)].view(-1, self.dim)
         scores, loss = self.pred_layer(masked_tensor, y, get_scores)
 
-        if self.use_contrastive:
-            lang_starts = torch.argwhere(positions == 0)
-            sent_emb1 = tensor[lang_starts[0]]
-            sent_emb2 = tensor[lang_starts[1]]
+        # if self.use_contrastive:
+        #     lang_starts = torch.argwhere(positions == 0)
+        #     sent_emb1 = tensor[lang_starts[0]]
+        #     sent_emb2 = tensor[lang_starts[1]]
+
         return scores, loss
 
     def generate(self, src_enc, src_len, tgt_lang_id, max_len=200, sample_temperature=None):

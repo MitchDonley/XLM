@@ -718,7 +718,7 @@ class Trainer(object):
         x, y, pred_mask, lengths, positions, langs = to_cuda(x, y, pred_mask, lengths, positions, langs)
 
         # forward / loss
-        pdb.set_trace()
+        # pdb.set_trace()
         tensor = model('fwd', x=x, lengths=lengths, positions=positions, langs=langs, causal=False)
         _, loss = model('predict', tensor=tensor, positions=positions, pred_mask=pred_mask, y=y, get_scores=False)
         self.stats[('MLM-%s' % lang1) if lang2 is None else ('MLM-%s-%s' % (lang1, lang2))].append(loss.item())
