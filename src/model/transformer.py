@@ -445,7 +445,7 @@ class TransformerModel(nn.Module):
         scores, loss = self.pred_layer(masked_tensor, y, get_scores)
 
         if self.use_contrastive:
-
+            pass
         return scores, loss
 
     def generate(self, src_enc, src_len, tgt_lang_id, max_len=200, sample_temperature=None):

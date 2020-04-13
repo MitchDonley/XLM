@@ -100,7 +100,7 @@ if [ $pair == "en-hi" ]; then
   echo "Download parallel data for English-Hindi"
   # IIT Bombay English-Hindi Parallel Corpus
   wget -c http://www.cfilt.iitb.ac.in/iitb_parallel/iitb_corpus_download/parallel.tgz -P $PARA_PATH
-  tar -xvf $PARA_PATH/parallel.tgz -d $PARA_PATH
+  tar -xf $PARA_PATH/parallel.tgz
 fi
 
 # en-ru
