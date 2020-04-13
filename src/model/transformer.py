@@ -445,7 +445,8 @@ class TransformerModel(nn.Module):
         scores, loss = self.pred_layer(masked_tensor, y, get_scores)
 
         if self.use_contrastive:
-            lang_starts = torch.argwhere(positions == 0)
+            lang_starts = (positions.T == 0).nonzero()
+            pdb.set_trace()
             sent_emb1 = tensor[lang_starts[0]]
             sent_emb2 = tensor[lang_starts[1]]
         return scores, loss
