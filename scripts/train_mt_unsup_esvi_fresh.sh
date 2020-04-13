@@ -1,7 +1,8 @@
-python -W ignore train.py --exp_name unsupMT_esvi_test \
---dump_path "/content/gdrive/My Drive/NLP-Project/dumped/" \
---reload_model 'mlm_17_1280.pth,mlm_17_1280.pth' \
---data_path ./data/mono_es_vi/processed/ \
+python -W ignore train.py \
+--exp_name unsupMT_esvi_test \
+--dump_path ./dumped/ \
+--data_path ./data/es_vi/processed/ \
+--reload_model "mlm_tlm_xnli15_1024.pth,mlm_tlm_xnli15_1024.pth" \
 --lgs 'es-vi' \
 --ae_steps 'es,vi' \
 --bt_steps 'es-vi-es,vi-es-vi' \
@@ -10,15 +11,16 @@ python -W ignore train.py --exp_name unsupMT_esvi_test \
 --word_blank 0.1 \
 --lambda_ae '0:1,100000:0.1,300000:0' \
 --encoder_only false \
---emb_dim 1280 \
---n_layers 6 \
+--emb_dim 1024 \
+--n_layers 12 \
 --n_heads 8 \
+--max_vocab 95000 \
 --dropout 0.1 \
 --attention_dropout 0.1 \
 --gelu_activation true \
---tokens_per_batch 1000 \
---batch_size 16 \
---bptt 128 \
+--tokens_per_batch 500 \
+--batch_size 8 \
+--bptt 64 \
 --optimizer adam_inverse_sqrt,beta1=0.9,beta2=0.98,lr=0.0001 \
 --epoch_size 200000 \
 --eval_bleu true \

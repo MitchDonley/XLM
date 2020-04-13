@@ -152,7 +152,6 @@ def build_model(params, dico):
 
         # reload a pretrained model
         if params.reload_model != '':
-            pdb.set_trace()
             enc_path, dec_path = params.reload_model.split(',')
             assert not (enc_path == '' and dec_path == '')
 
