@@ -302,7 +302,7 @@ class TransformerModel(nn.Module):
         
         # contrastive loss
         self.use_contrastive = params.contrastive_loss
-        self.contrastive = nn.Sequential(nn.Linear(self.hidden_dim, self.hidden_dim), nn.relu(), nn.Linear(self.hidden_dim, self.hidden_dim))
+        self.contrastive = nn.Sequential(nn.Linear(self.hidden_dim, self.hidden_dim), nn.ReLU(), nn.Linear(self.hidden_dim, self.hidden_dim))
 
         for layer_id in range(self.n_layers):
             self.attentions.append(MultiHeadAttention(self.n_heads, self.dim, dropout=self.attention_dropout))
