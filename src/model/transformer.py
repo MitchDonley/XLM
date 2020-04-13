@@ -302,7 +302,7 @@ class TransformerModel(nn.Module):
         
         # contrastive loss
         self.use_contrastive = params.contrastive_loss
-        self.contrastive = nn.Sequential(nn.Linear(self.hidden_dim, self.hidden_dim), nn.Relu(), nn.Linear(self.hidden_dim, self.hidden_dim))
+        self.contrastive = nn.Sequential(nn.Linear(self.hidden_dim, self.hidden_dim), nn.relu(), nn.Linear(self.hidden_dim, self.hidden_dim))
 
         for layer_id in range(self.n_layers):
             self.attentions.append(MultiHeadAttention(self.n_heads, self.dim, dropout=self.attention_dropout))
@@ -432,7 +432,7 @@ class TransformerModel(nn.Module):
 
         return tensor
 
-    def predict(self, tensor, pred_mask, y, get_scores):
+    def predict(self, tensor, positions, pred_mask, y, get_scores):
         """
         Given the last hidden state, compute word scores and/or the loss.
             `pred_mask` is a ByteTensor of shape (slen, bs), filled with 1 when
@@ -445,7 +445,9 @@ class TransformerModel(nn.Module):
         scores, loss = self.pred_layer(masked_tensor, y, get_scores)
 
         if self.use_contrastive:
-            pass
+            lang_starts = torch.argwhere(positions == 0)
+            sent_emb1 = tensor[lang_starts[0]]
+            sent_emb2 = tensor[lang_starts[1]]
         return scores, loss
 
     def generate(self, src_enc, src_len, tgt_lang_id, max_len=200, sample_temperature=None):
