@@ -302,6 +302,7 @@ class TransformerModel(nn.Module):
         
         # contrastive loss
         self.use_contrastive = params.contrastive_loss
+        self.temp = params.temperature
         self.contrastive = nn.Sequential(nn.Linear(self.hidden_dim, self.hidden_dim), nn.ReLU(), nn.Linear(self.hidden_dim, self.hidden_dim))
 
         for layer_id in range(self.n_layers):
@@ -445,11 +446,58 @@ class TransformerModel(nn.Module):
         scores, loss = self.pred_layer(masked_tensor, y, get_scores)
 
         if self.use_contrastive:
-            lang_starts = (positions.T == 0).nonzero()
+            # Get positions that are start index. Each sentence is along the column.
+            lang_starts = (positions == 0).nonzero().reshape(2, -1, 2)
             pdb.set_trace()
-            sent_emb1 = tensor[lang_starts[0]]
-            sent_emb2 = tensor[lang_starts[1]]
+
+            # range for batch size
+            bs_list = torch.arange(tensor.shape[1])
+            zeros = torch.zeros_like(bs_list)
+
+            # First set of start index embeddings should be the first token in each sentence
+            sent_emb1 = tensor[zeros, bs_list, :]
+
+            # Sort in order to get the second position token per column
+            sort_emb_idx = torch.argsort(lang_starts[1][:,1])
+            sort_emb = lang_starts[1][sort_emb_idx, 0]
+
+            # Index the row based on the second start position for each sentence in the batch
+            sent_emb2 = tensor[sort_emb, bs_list, :]
+
+            # Concatenate the start position embedings such that it is in the shape of (batch size, 2, embedding dim)
+            sent_embs = torch.cat((sent_emb1.unsqueeze(1), sent_emb2.unsqueeze(1)), dim = 1)
+            contrastive_loss = self.nt_xent_loss(sent_embs)
+            loss += contrastive_loss
+
         return scores, loss
+
+    def nt_xent_loss(self,sent_embs):
+        """
+        Given sets of sentence embeddings compute the normalized temperature cross entropy loss (nt-xent)
+            `sent_embs` is a FloadTensor of shape (bs, 2, hidden_dim) containing the 2 sentence embeddings 
+            for each sample in the batch
+            Loss: equation from SimCLR
+        """
+        loss = 0
+        bs, _, hidden_dim = sent_embs.shape
+        flattened_sent_emb = sent_embs.reshape(bs * 2, hidden_dim)
+
+        ## cos similarity matrix ##
+        proj_sent_emb = self.contrastive(flattened_sent_emb)
+        norm_proj_sent_emb = proj_sent_emb / torch.norm(proj_sent_emb, dim = 1).unsqueeze(1)
+        cos_sim = torch.matmul(norm_proj_sent_emb, norm_proj_sent_emb.T)
+        cos_sim_over_temp = torch.exp(cos_sim / self.temp)
+        cos_sim_over_temp.fill_diagonal_(0)
+
+        ## denom for loss ##
+        denominators = torch.sum(cos_sim_over_temp, dim = 1).unsqueeze(1)
+
+        loss_mat = -torch.log(cos_sim_over_temp / denominators)
+
+        tri_band_mat = torch.triu(loss_mat, diagonal = -1) - torch.triu(loss_mat, diagonal = 2)
+
+        loss = (tri_band_mat.sum(dim = None) - torch.diag(tri_band_mat).sum(dim = None)) / (2 * bs)
+        return loss
 
     def generate(self, src_enc, src_len, tgt_lang_id, max_len=200, sample_temperature=None):
         """
