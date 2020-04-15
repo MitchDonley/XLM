@@ -9,6 +9,8 @@ CODES_PATH=$MAIN_PATH/codes_xnli_15
 VOCAB_PATH=$MAIN_PATH/vocab_xnli_15
 FASTBPE=$TOOLS_PATH/fastBPE/fast
 
+mkdir -p $PROCESSED_PATH
+
 
 ## Prepare monolingual data
 # apply BPE codes and binarize the monolingual corpora
@@ -18,6 +20,8 @@ for lg in ar bg de el en es fr hi ru sw th tr ur vi zh; do
     python preprocess.py $VOCAB_PATH $PROCESSED_PATH/$split.$lg
     done
 done
+
+cp -r $PROCESSED_PATH/* "/content/gdrive/My Drive/NLP-project/processed/"
 
 ## Prepare parallel data
 # apply BPE codes and binarize the parallel corpora
@@ -29,3 +33,5 @@ for pair in ar-en bg-en de-en el-en en-es en-fr en-hi en-ru en-sw en-th en-tr en
         done
     done
 done
+
+cp -r $PROCESSED_PATH/* "/content/gdrive/My Drive/NLP-project/processed/"
