@@ -21,8 +21,8 @@ TOOLS_PATH=$PWD/tools
 WIKI_PATH=$PWD/data/wiki
 XNLI_PATH=$PWD/data/xnli/XNLI-1.0
 PROCESSED_PATH=$PWD/data/processed/XLM15
-CODES_PATH=$MAIN_PATH/codes_xnli_15_mlm_tlm
-VOCAB_PATH=$MAIN_PATH/vocab_xnli_15_mlm_tlm
+CODES_PATH=$MAIN_PATH/codes_xnli_15
+VOCAB_PATH=$MAIN_PATH/vocab_xnli_15
 FASTBPE=$TOOLS_PATH/fastBPE/fast
 
 
