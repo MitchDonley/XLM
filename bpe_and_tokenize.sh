@@ -24,7 +24,7 @@ done
 for pair in ar-en bg-en de-en el-en en-es en-fr en-hi en-ru en-sw en-th en-tr en-ur en-vi en-zh; do
     for lg in $(echo $pair | sed -e 's/\-/ /g'); do
         for split in train valid test; do
-            $FASTBPE applybpe $PROCESSED_PATH/$split.$pair.$lg "/content/gdrive/My Drive/NLP-project/para$pair.$lg.$split" $CODES_PATH
+            $FASTBPE applybpe $PROCESSED_PATH/$split.$pair.$lg "/content/gdrive/My Drive/NLP-project/para/$pair.$lg.$split" $CODES_PATH
             python preprocess.py $VOCAB_PATH $PROCESSED_PATH/$split.$pair.$lg
         done
     done
