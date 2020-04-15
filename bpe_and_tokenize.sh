@@ -18,6 +18,7 @@ for lg in ar bg de el en es fr hi ru sw th tr ur vi zh; do
     for split in train valid test; do
     $FASTBPE applybpe $PROCESSED_PATH/$split.$lg "/content/gdrive/My Drive/NLP-project/wiki/$lg.$split" $CODES_PATH
     python preprocess.py $VOCAB_PATH $PROCESSED_PATH/$split.$lg
+    rm -f $PROCESSED_PATH/$split.$lg
     done
 done
 
@@ -30,6 +31,7 @@ for pair in ar-en bg-en de-en el-en en-es en-fr en-hi en-ru en-sw en-th en-tr en
         for split in train valid test; do
             $FASTBPE applybpe $PROCESSED_PATH/$split.$pair.$lg "/content/gdrive/My Drive/NLP-project/para/$pair.$lg.$split" $CODES_PATH
             python preprocess.py $VOCAB_PATH $PROCESSED_PATH/$split.$pair.$lg
+            rm -f $PROCESSED_PATH/$split.$pair.$lg
         done
     done
 done
