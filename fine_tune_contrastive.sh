@@ -2,7 +2,7 @@ python train.py \
 --exp_name fine_tune_xnli_tlm_contrastive \
 --dump_path ./dumped/ \
 --reload_model mlm_tlm_xnli15_1024.pth \
---data_path /data/processed/ \
+--data_path ./data/processed/ \
 --lgs 'ar-bg-de-el-en-es-fr-hi-ru-sw-th-tr-ur-vi-zh' \
 --clm_steps '' \
 --mlm_steps 'en-ar,en-bg,en-de,en-el,en-es,en-fr,en-hi,en-ru,en-sw,en-th,en-tr,en-ur,en-vi,en-zh,ar-en,bg-en,de-en,el-en,es-en,fr-en,hi-en,ru-en,sw-en,th-en,tr-en,ur-en,vi-en,zh-en' \

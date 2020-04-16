@@ -490,8 +490,7 @@ class TransformerModel(nn.Module):
         proj_sent_emb = self.contrastive(flattened_sent_emb)
         norm_proj_sent_emb = proj_sent_emb / torch.norm(proj_sent_emb, dim = 1).unsqueeze(1)
         cos_sim = torch.matmul(norm_proj_sent_emb, norm_proj_sent_emb.T)
-        cos_sim_over_temp = torch.exp(cos_sim / self.temp)
-        cos_sim_over_temp.fill_diagonal_(0)
+        cos_sim_over_temp = torch.exp(cos_sim / self.temp).fill_diagonal(0)
 
         ## denom for loss ##
         denominators = torch.sum(cos_sim_over_temp, dim = 1).unsqueeze(1)
