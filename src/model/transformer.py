@@ -305,7 +305,7 @@ class TransformerModel(nn.Module):
         # contrastive loss
         self.use_contrastive = params.contrastive_loss
         self.temp = params.temperature
-        self.contrastive = nn.Sequential(nn.Linear(self.hidden_dim, self.hidden_dim), nn.ReLU(), nn.Linear(self.hidden_dim, self.hidden_dim))
+        self.contrastive = nn.Sequential(nn.Linear(self.dim, self.dim), nn.ReLU(), nn.Linear(self.dim, self.dim))
 
         for layer_id in range(self.n_layers):
             self.attentions.append(MultiHeadAttention(self.n_heads, self.dim, dropout=self.attention_dropout))
@@ -451,7 +451,6 @@ class TransformerModel(nn.Module):
         if self.use_contrastive:
             # Get positions that are start index. Each sentence is along the column.
             lang_starts = (positions == 0).nonzero().reshape(2, -1, 2)
-            pdb.set_trace()
 
             # range for batch size
             bs_list = torch.arange(tensor.shape[1])

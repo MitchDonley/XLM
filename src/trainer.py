@@ -720,7 +720,6 @@ class Trainer(object):
         x, y, pred_mask, lengths, positions, langs = to_cuda(x, y, pred_mask, lengths, positions, langs)
 
         # forward / loss
-        pdb.set_trace()
         tensor = model('fwd', x=x, lengths=lengths, positions=positions, langs=langs, causal=False)
         _, loss, loss_dict = model('predict', tensor=tensor, positions=positions, pred_mask=pred_mask, y=y, get_scores=False)
         tlm_loss = loss_dict['tlm']
