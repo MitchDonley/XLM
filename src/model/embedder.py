@@ -47,10 +47,14 @@ class SentenceEmbedder(object):
         if 'contrastive_loss' not in pretrain_params:
             pretrain_params.contrastive_loss = False
             pretrain_params.temperature = 0.1
+            ### NEED TO INITIALIZE STATE DICT FOR CONTRASTIVE PROJECTION ###
+            # pretrain_params.contrastive.0.weight = torch.nn.init()
 
         # build model and reload weights
         model = TransformerModel(pretrain_params, dico, True, True)
-        model.load_state_dict(state_dict)
+        init_model_dict = model.state_dict()
+        filtered_dict = {k: v for k, v in state_dict.items() if k in init_model_dict}
+        model.load_state_dict(filtered_dict)
         model.eval()
 
         # adding missing parameters
