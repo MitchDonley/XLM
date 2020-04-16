@@ -6,7 +6,8 @@ python glue-xnli.py \
 --model_path mlm_tlm_xnli15_1024.pth \
 --data_path "/content/gdrive/My Drive/NLP-project/processed" \
 --transfer_tasks XNLI \
---dropout 0.01 \
+--optimizer_e sgd,lr=0.000025 \
+--optimizer_p sgd,lr=0.000025 \
 --finetune_layers "0:_1" \
 --batch_size 4 \
 --n_epochs 250 \
