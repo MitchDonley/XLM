@@ -25,6 +25,8 @@ from ..utils import concat_batches, truncate, to_cuda
 from ..data.dataset import Dataset, ParallelDataset
 from ..data.loader import load_binarized, set_dico_parameters
 
+torch.manual_seed(42)
+
 
 N_CLASSES = {
     'MNLI-m': 3,

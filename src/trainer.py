@@ -524,7 +524,6 @@ class Trainer(object):
         data['dico_word2id'] = self.data['dico'].word2id
         data['dico_counts'] = self.data['dico'].counts
         data['params'] = {k: v for k, v in self.params.__dict__.items()}
-        pdb.set_trace()
         torch.save(data, path)
 
     def reload_checkpoint(self):

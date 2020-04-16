@@ -16,6 +16,8 @@ import pdb
 
 from .memory import HashingMemory
 
+torch.manual_seed(42)
+np.random.seed(42)
 
 N_MAX_POSITIONS = 512  # maximum input sequence length
 

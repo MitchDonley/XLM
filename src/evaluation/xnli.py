@@ -24,6 +24,7 @@ from ..data.loader import load_binarized, set_dico_parameters
 
 XNLI_LANGS = ['ar', 'bg', 'de', 'el', 'en', 'es', 'fr', 'hi', 'ru', 'sw', 'th', 'tr', 'ur', 'vi', 'zh']
 
+torch.manual_seed(42)
 
 logger = getLogger()
 

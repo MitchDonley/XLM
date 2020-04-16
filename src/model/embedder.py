@@ -14,6 +14,7 @@ from ..utils import AttrDict
 
 import pdb
 
+torch.manual_seed(42)
 
 logger = getLogger()
 
