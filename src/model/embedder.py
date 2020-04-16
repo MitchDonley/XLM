@@ -54,8 +54,8 @@ class SentenceEmbedder(object):
         model = TransformerModel(pretrain_params, dico, True, True)
         init_model_dict = model.state_dict()
         filtered_dict = {k: v for k, v in state_dict.items() if k in init_model_dict}
-        model.update(filtered_dict)
-        # model.load_state_dict(init_model_dict)
+        init_model_dict.update(filtered_dict)
+        model.load_state_dict(init_model_dict)
         model.eval()
 
         # adding missing parameters
