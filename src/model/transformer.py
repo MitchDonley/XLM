@@ -446,6 +446,7 @@ class TransformerModel(nn.Module):
 
         masked_tensor = tensor[pred_mask.unsqueeze(-1).expand_as(tensor)].view(-1, self.dim)
         scores, loss = self.pred_layer(masked_tensor, y, get_scores)
+        loss_dict = {'tlm': loss.item()}
 
         if self.use_contrastive:
             # Get positions that are start index. Each sentence is along the column.
@@ -470,8 +471,10 @@ class TransformerModel(nn.Module):
             sent_embs = torch.cat((sent_emb1.unsqueeze(1), sent_emb2.unsqueeze(1)), dim = 1)
             contrastive_loss = self.nt_xent_loss(sent_embs)
             loss += contrastive_loss
+            loss_dict['contrastive'] = contrastive_loss.item()
+        loss_dict['total'] = loss.item()
 
-        return scores, loss
+        return scores, loss, loss_dict
 
     def nt_xent_loss(self,sent_embs):
         """

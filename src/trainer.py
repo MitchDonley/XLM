@@ -686,7 +686,7 @@ class Trainer(object):
 
         # forward / loss
         tensor = model('fwd', x=x, lengths=lengths, langs=langs, causal=True)
-        _, loss = model('predict', tensor=tensor, pred_mask=pred_mask, y=y, get_scores=False)
+        _, loss, _ = model('predict', tensor=tensor, pred_mask=pred_mask, y=y, get_scores=False)
         self.stats[('CLM-%s' % lang1) if lang2 is None else ('CLM-%s-%s' % (lang1, lang2))].append(loss.item())
         loss = lambda_coeff * loss
 
@@ -722,8 +722,14 @@ class Trainer(object):
         # forward / loss
         pdb.set_trace()
         tensor = model('fwd', x=x, lengths=lengths, positions=positions, langs=langs, causal=False)
-        _, loss = model('predict', tensor=tensor, positions=positions, pred_mask=pred_mask, y=y, get_scores=False)
-        self.stats[('MLM-%s' % lang1) if lang2 is None else ('MLM-%s-%s' % (lang1, lang2))].append(loss.item())
+        _, loss, loss_dict = model('predict', tensor=tensor, positions=positions, pred_mask=pred_mask, y=y, get_scores=False)
+        tlm_loss = loss_dict['tlm']
+        if 'contrastive' in loss_dict.keys():
+            contrastive_loss = loss_dict['contrastive']
+        else:
+            contrastive_loss = -1
+        loss_total = loss_dict['total']
+        self.stats[('MLM-%s' % lang1) if lang2 is None else ('MLM-%s-%s' % (lang1, lang2))].append((loss_total, tlm_loss, contrastive_loss)
         loss = lambda_coeff * loss
 
         # optimize
