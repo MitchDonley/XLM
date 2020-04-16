@@ -729,7 +729,7 @@ class Trainer(object):
         else:
             contrastive_loss = -1
         loss_total = loss_dict['total']
-        self.stats[('MLM-%s' % lang1) if lang2 is None else ('MLM-%s-%s' % (lang1, lang2))].append((loss_total, tlm_loss, contrastive_loss)
+        self.stats[('MLM-%s' % lang1) if lang2 is None else ('MLM-%s-%s' % (lang1, lang2))].append((loss_total, tlm_loss, contrastive_loss))
         loss = lambda_coeff * loss
 
         # optimize
