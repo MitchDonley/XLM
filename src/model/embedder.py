@@ -43,7 +43,6 @@ class SentenceEmbedder(object):
         pretrain_params.unk_index = dico.index(UNK_WORD)
         pretrain_params.mask_index = dico.index(MASK_WORD)
 
-        pdb.set_trace()
         if 'contrastive_loss' not in pretrain_params:
             pretrain_params.contrastive_loss = False
             pretrain_params.temperature = 0.1
