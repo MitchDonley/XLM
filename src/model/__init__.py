@@ -131,8 +131,10 @@ def build_model(params, dico):
             #         if k in model.state_dict() and k not in reloaded:
             #             logger.warning("Parameter %s not found. Ignoring ..." % k)
             #             reloaded[k] = model.state_dict()[k]
-
-            model.load_state_dict(reloaded)
+            init_model_dict = model.state_dict()
+            filtered_dict = {k: v for k, v in reloaded.items() if k in init_model_dict}
+            init_model_dict.update(filtered_dict)
+            model.load_state_dict(init_model_dict)
 
         logger.info("Model: {}".format(model))
         logger.info("Number of parameters (model): %i" % sum([p.numel() for p in model.parameters() if p.requires_grad]))
