@@ -5,11 +5,10 @@ python glue-xnli.py \
 --dump_path "/content/gdrive/My Drive/NLP-project/dumped/" \
 --model_path mlm_tlm_xnli15_1024.pth \
 --data_path "/content/gdrive/My Drive/NLP-project/processed" \
---transfer_tasks XNLI,SST-2 \
---optimizer_e adam,lr=0.000125 \
---optimizer_p adam,lr=0.000125 \
+--transfer_tasks XNLI \
+--dropout 0.01 \
 --finetune_layers "0:_1" \
---batch_size 8 \
+--batch_size 4 \
 --n_epochs 250 \
 --epoch_size 20000 \
 --max_len 256 \
