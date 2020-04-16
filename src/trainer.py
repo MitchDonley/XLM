@@ -24,6 +24,9 @@ from .model.memory import HashingMemory
 from .model.transformer import TransformerFFN
 import pdb
 
+torch.manual_seed(42)
+np.random.seed(42)
+
 
 logger = getLogger()
 
