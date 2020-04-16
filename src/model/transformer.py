@@ -500,7 +500,7 @@ class TransformerModel(nn.Module):
 
         tri_band_mat = torch.triu(loss_mat, diagonal = -1) - torch.triu(loss_mat, diagonal = 2)
 
-        loss = (tri_band_mat.sum(dim = None) - torch.diag(tri_band_mat).sum(dim = None)) / (2 * bs)
+        loss = (tri_band_mat.sum() - torch.diag(tri_band_mat).sum()) / (2 * bs)
         return loss
 
     def generate(self, src_enc, src_len, tgt_lang_id, max_len=200, sample_temperature=None):
