@@ -12,6 +12,8 @@ from .transformer import TransformerModel
 from ..data.dictionary import Dictionary, BOS_WORD, EOS_WORD, PAD_WORD, UNK_WORD, MASK_WORD
 from ..utils import AttrDict
 
+import pdb
+
 
 logger = getLogger()
 
@@ -40,6 +42,11 @@ class SentenceEmbedder(object):
         pretrain_params.pad_index = dico.index(PAD_WORD)
         pretrain_params.unk_index = dico.index(UNK_WORD)
         pretrain_params.mask_index = dico.index(MASK_WORD)
+
+        pdb.set_trace()
+        if 'contrastive_loss' not in pretrain_params:
+            pretrain_params.contrastive_loss = False
+            pretrain_params.temperature = 0.1
 
         # build model and reload weights
         model = TransformerModel(pretrain_params, dico, True, True)
