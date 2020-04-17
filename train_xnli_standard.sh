@@ -8,7 +8,7 @@ python glue-xnli.py \
 --transfer_tasks XNLI \
 --optimizer_e sgd,lr=0.000125 \
 --optimizer_p sgd,lr=0.000125 \
---finetune_layers "0:_1" \
+--finetune_layers "0" \
 --batch_size 8 \
 --n_epochs 250 \
 --epoch_size 20000 \
