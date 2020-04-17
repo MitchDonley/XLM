@@ -14,7 +14,8 @@ python -W ignore train.py \
 --gelu_activation true \
 --contrastive_loss true \
 --max_vocab 95000 \
---batch_size 32 \
+--batch_size 16 \
+--fp16 true
 --bptt 256 \
 --optimizer adam_inverse_sqrt,beta1=0.9,beta2=0.98,lr=0.0001,weight_decay=0 \
 --epoch_size 200000 \
