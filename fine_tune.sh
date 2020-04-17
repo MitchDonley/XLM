@@ -13,7 +13,7 @@ python -W ignore train.py \
 --attention_dropout 0.1 \
 --gelu_activation true \
 --max_vocab 95000 \
---batch_size 32 \
+--batch_size 16 \
 --bptt 256 \
 --optimizer adam_inverse_sqrt,beta1=0.9,beta2=0.98,lr=0.0001,weight_decay=0 \
 --epoch_size 200000 \
