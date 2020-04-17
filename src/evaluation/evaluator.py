@@ -376,7 +376,7 @@ class Evaluator(object):
             print(x.shape, y.shape, pred_mask.shape, lengths.shape, positions.shape)
             # forward / loss
             tensor = model('fwd', x=x, lengths=lengths, positions=positions, langs=langs, causal=False)
-            word_scores, loss = model('predict', tensor=tensor, pred_mask=pred_mask, y=y, get_scores=True)
+            word_scores, loss = model('predict', tensor=tensor, positions=positions, pred_mask=pred_mask, y=y, get_scores=True)
 
             # update stats
             n_words += len(y)

@@ -11,6 +11,6 @@ python glue-xnli.py \
 --finetune_layers "0:_1" \
 --batch_size 8 \
 --n_epochs 250 \
---epoch_size 20000 \
+--epoch_size 60000 \
 --max_len 256 \
 --max_vocab 95000 \
