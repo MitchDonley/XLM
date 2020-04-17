@@ -464,18 +464,18 @@ class TransformerModel(nn.Module):
         lang_starts = (positions == 0).nonzero().reshape(2, -1, 2)
 
         # First set of start index embeddings should be the first token in each sentence
-        sent_emb1 = tensor[torch.zeros(tensor.shape[1]), torch.arange(tensor.shape[1]), :]
+        sent_emb1 = tensor[torch.zeros(tensor.shape[1]).long(), torch.arange(tensor.shape[1]).long(), :]
 
         # Sort in order to get the second position token per column
         sort_emb = lang_starts[1][torch.argsort(lang_starts[1][:,1]), 0]
 
         # Index the row based on the second start position for each sentence in the batch
-        sent_emb2 = tensor[sort_emb, torch.arange(tensor.shape[1]), :]
+        sent_emb2 = tensor[sort_emb, torch.arange(tensor.shape[1]).long(), :]
 
         # Concatenate the start position embedings such that it is in the shape of (batch size, 2, embedding dim)
         sent_embs = torch.cat((sent_emb1.unsqueeze(1), sent_emb2.unsqueeze(1)), dim = 1)
         return sent_embs
-        
+
     def nt_xent_loss(self,sent_embs):
         """
         Given sets of sentence embeddings compute the normalized temperature cross entropy loss (nt-xent)
