@@ -1,4 +1,4 @@
-python train.py \
+python -W ignore train.py \
 --exp_name fine_tune_xnli_tlm_contrastive \
 --dump_path ./dumped/ \
 --reload_model mlm_tlm_xnli15_1024.pth \
