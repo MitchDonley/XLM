@@ -263,7 +263,7 @@ class Trainer(object):
             '{}: {:7.4f}'.format(k, np.mean(v)) for k, v in self.stats.items()
             if type(v) is list and len(v) > 0
         ])
-        s_avg =  ' || AVG LOSS: {} || '.format(np.mean([np.mean(v) for k,v in self.stats.items()]))
+        s_avg =  ' || AVG LOSS: {} '.format(np.mean([np.mean(v) for k,v in self.stats.items() if type(v) is list and len(v) > 0]))
         for k in self.stats.keys():
             if type(self.stats[k]) is list:
                 del self.stats[k][:]
