@@ -263,6 +263,7 @@ class Trainer(object):
             '{}: {:7.4f}'.format(k, np.mean(v)) for k, v in self.stats.items()
             if type(v) is list and len(v) > 0
         ])
+        s_avg =  ' || AVG LOSS: {} || '.format(np.mean([np.mean(v) for k,v in self.stats.items()]))
         for k in self.stats.keys():
             if type(self.stats[k]) is list:
                 del self.stats[k][:]
@@ -284,7 +285,7 @@ class Trainer(object):
         self.last_time = new_time
 
         # log speed + stats + learning rate
-        logger.info(s_iter + s_speed + s_stat + s_lr)
+        logger.info(s_iter + s_speed + s_stat + s_avg + s_lr)
 
     def get_iterator(self, iter_name, lang1, lang2, stream):
         """
