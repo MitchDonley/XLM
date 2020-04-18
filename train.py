@@ -20,11 +20,6 @@ from src.evaluation.evaluator import SingleEvaluator, EncDecEvaluator
 
 import warnings
 
-def fxn():
-    warnings.warn("deprecated", DeprecationWarning)
-
-
-
 
 def get_parser():
     """
@@ -321,9 +316,7 @@ def main(params):
 
 if __name__ == '__main__':
 
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        fxn()
+    warnings.filterwarnings("ignore")
 
     # generate parser / parse parameters
     parser = get_parser()
