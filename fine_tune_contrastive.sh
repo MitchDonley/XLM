@@ -18,5 +18,5 @@ python -W ignore train.py \
 --bptt 256 \
 --optimizer adam_inverse_sqrt,beta1=0.9,beta2=0.98,lr=0.0001,weight_decay=0 \
 --epoch_size 200000 \
---validation_metrics valid_zh_en_mlm_ppl \
---stopping_criterion valid_zh_en_mlm_ppl,10 \
+--validation_metrics avg_tlm_ppl \
+--stopping_criterion avg_tlm_ppl,10 \
