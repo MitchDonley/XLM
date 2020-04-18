@@ -23,9 +23,7 @@ import warnings
 def fxn():
     warnings.warn("deprecated", DeprecationWarning)
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore")
-    fxn()
+
 
 
 def get_parser():
@@ -322,6 +320,10 @@ def main(params):
 
 
 if __name__ == '__main__':
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        fxn()
 
     # generate parser / parse parameters
     parser = get_parser()
