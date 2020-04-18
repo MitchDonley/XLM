@@ -234,7 +234,7 @@ class Evaluator(object):
                 # prediction task (evaluate perplexity and accuracy)
                 for lang1, lang2 in params.mlm_steps:
                     self.evaluate_mlm(scores, data_set, lang1, lang2)
-                _mlm_para = [l1 for (l1, l2) in params.mlm_steps if l2 is not None]
+                _mlm_para = [(l1, l2) for (l1, l2) in params.mlm_steps if l2 is not None]
                 if len(_mlm_para) > 0:
                     scores['avg_%s_tlm_ppl' % (data_set)] = np.mean([scores['%s_%s_%s_mlm_ppl' % (data_set, lang1, lang2)] for lang1, lang2 in _mlm_para])
                     scores['avg_%s_tlm_acc' % (data_set)] = np.mean([scores['%s_%s_%s_mlm_acc' % (data_set, lang1, lang2)] for lang1, lang2 in _mlm_para])
