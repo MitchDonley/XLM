@@ -3,7 +3,7 @@
 python glue-xnli.py \
 --exp_name test_xnli_mlm_tlm_contrastive \
 --dump_path "/content/gdrive/My Drive/NLP-project/dumped/" \
---model_path "/content/gdrive/My Drive/NLP-project/dumped/fine_tune_xnli_tlm_contrastive/rva7ib66ir/best-avg_valid_tlm_ppl.pth" \
+--model_path ./best-avg_valid_tlm_ppl.pth \
 --data_path "/content/gdrive/My Drive/NLP-project/processed" \
 --transfer_tasks XNLI \
 --optimizer_e sgd,lr=0.000125 \
