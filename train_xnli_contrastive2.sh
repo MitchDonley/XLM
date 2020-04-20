@@ -6,11 +6,11 @@ python glue-xnli.py \
 --model_path ./best-avg_valid_tlm_ppl.pth \
 --data_path "/content/gdrive/My Drive/NLP-project/processed" \
 --transfer_tasks XNLI \
---optimizer_e sgd,lr=0.000025 \
---optimizer_p sgd,lr=0.000025 \
+--optimizer_e sgd,lr=0.000035 \
+--optimizer_p sgd,lr=0.000035 \
 --finetune_layers "0:_1" \
 --batch_size 4 \
 --n_epochs 250 \
---epoch_size 20000 \
+--epoch_size 10000 \
 --max_len 256 \
 --max_vocab 95000 \
