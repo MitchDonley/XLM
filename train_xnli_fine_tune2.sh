@@ -1,16 +1,16 @@
 #!/bin/bash
 
 python glue-xnli.py \
---exp_name test_xnli_mlm_tlm_contrastive \
+--exp_name test_xnli_mlm_tlm_fine_tune \
 --dump_path "/content/gdrive/My Drive/NLP-project/dumped/" \
 --model_path ./best-avg_valid_tlm_ppl.pth \
 --data_path "/content/gdrive/My Drive/NLP-project/processed" \
 --transfer_tasks XNLI \
---optimizer_e adam,lr=0.0000375 \
---optimizer_p adam,lr=0.0000375 \
+--optimizer_e sgd,lr=0.000025 \
+--optimizer_p sgd,lr=0.000025 \
 --finetune_layers "0:_1" \
---batch_size 4 \
+--batch_size 8 \
 --n_epochs 250 \
---epoch_size 10000 \
+--epoch_size 20000 \
 --max_len 256 \
 --max_vocab 95000 \
