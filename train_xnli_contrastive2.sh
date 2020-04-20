@@ -9,7 +9,7 @@ python glue-xnli.py \
 --optimizer_e adam,lr=0.00003 \
 --optimizer_p adam,lr=0.00003 \
 --finetune_layers "0:_1" \
---batch_size 4 \
+--batch_size 8 \
 --n_epochs 250 \
 --epoch_size 10000 \
 --max_len 256 \
