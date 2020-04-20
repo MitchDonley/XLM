@@ -12,26 +12,30 @@ scores['best'] = None
 for folder in folders:
     directory = folder + '/train.log'
     f = open(directory, 'r')
-    optim = []
+    params = []
     for line in f:
         if 'optimizer_e:' in line:
-            optim.append(line.strip().split(':')[1].strip())
+            params.append(line.strip().split(':')[1].strip())
         if 'optimizer_p:' in line:
-            optim.append(line.strip().split(':')[1].strip())
-        if len(optim) == 2 and (str(optim) not in scores.keys()):
-            scores[str(optim)] = {}
+            params.append(line.strip().split(':')[1].strip())
+        if 'batch:' in line:
+            params.append(line.strip().split(':')[1].strip())
+        if 'epoch_size:' in line:
+            params.append(line.strip().split(':')[1].strip())
+        if len(params) == 4 and (str(params) not in scores.keys()):
+            scores[str(params)] = {}
         if '__log__' in line:
             score_dict = line.split('__')[-1][1:]
             score_dict = json.loads(score_dict)
             epoch = score_dict['epoch']
             del score_dict['epoch']
-            scores[str(optim)][epoch] = score_dict
+            scores[str(params)][epoch] = score_dict
             val_score = np.mean([v for k,v in score_dict.items() if 'valid' in k])
-            scores[str(optim)][epoch]['avg_valid'] = val_score
+            scores[str(parmas)][epoch]['avg_valid'] = val_score
             if scores['best'] is None or scores['best']['avg_valid'] < val_score:
                 if scores['best'] is None:
                     scores['best'] = {}
-                scores['best']['optim'] = str(optim)
+                scores['best']['optim'] = str(params)
                 scores['best']['avg_valid'] = val_score
                 scores['best']['epoch'] = epoch
                 scores['best']['dict'] = score_dict
