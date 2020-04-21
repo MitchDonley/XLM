@@ -154,6 +154,8 @@ def get_parser():
                         help="Enforce contrastive learning on encoder embeddings (only for TLM)")
     parser.add_argument("--temperature", type=float, default=0.1,
                         help="Temperature value used in nt-xent loss")
+    parser.add_argument("--lambda_mult", type=float, default=1,
+                        help="Multiplier for the nt-xent loss")
 
     # training coefficients
     parser.add_argument("--lambda_mlm", type=str, default="1",

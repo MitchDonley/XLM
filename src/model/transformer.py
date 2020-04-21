@@ -306,6 +306,7 @@ class TransformerModel(nn.Module):
         self.use_contrastive = params.contrastive_loss
         self.temp = params.temperature
         self.contrastive = nn.Sequential(nn.Linear(self.dim, self.dim), nn.ReLU(), nn.Linear(self.dim, self.dim))
+        self.lamb = params.lambda_mult
 
         for layer_id in range(self.n_layers):
             self.attentions.append(MultiHeadAttention(self.n_heads, self.dim, dropout=self.attention_dropout))
@@ -435,7 +436,7 @@ class TransformerModel(nn.Module):
 
         return tensor
 
-    def predict(self, tensor, positions, pred_mask, y, get_scores):
+    def predict(self, tensor, positions, lang_emb, pred_mask, y, get_scores):
         """
         Given the last hidden state, compute word scores and/or the loss.
             `pred_mask` is a ByteTensor of shape (slen, bs), filled with 1 when
@@ -452,7 +453,7 @@ class TransformerModel(nn.Module):
             
             sent_embs = self.get_sent_embs(tensor, positions)
             contrastive_loss = self.nt_xent_loss(sent_embs)
-            loss += contrastive_loss
+            loss += (self.lamb * contrastive_loss)
             # loss_dict['contrastive'] = contrastive_loss.item()
         # loss_dict['total'] = loss.item()
 
@@ -475,6 +476,10 @@ class TransformerModel(nn.Module):
         # Concatenate the start position embedings such that it is in the shape of (batch size, 2, embedding dim)
         sent_embs = torch.cat((sent_emb1.unsqueeze(1), sent_emb2.unsqueeze(1)), dim = 1)
         return sent_embs
+
+    def get_sent_embs_max_pool(self, tensor, langs):
+        pdb.set_trace()
+        lang1 = tensor[]
 
     def nt_xent_loss(self,sent_embs):
         """
