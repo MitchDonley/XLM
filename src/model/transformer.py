@@ -451,7 +451,7 @@ class TransformerModel(nn.Module):
 
         if self.use_contrastive:
             
-            sent_embs = self.get_sent_embs(tensor, positions)
+            sent_embs = self.get_sent_embs_max_pool(tensor, lang_emb)
             contrastive_loss = self.nt_xent_loss(sent_embs)
             loss += (self.lamb * contrastive_loss)
             # loss_dict['contrastive'] = contrastive_loss.item()
@@ -479,7 +479,6 @@ class TransformerModel(nn.Module):
 
     def get_sent_embs_max_pool(self, tensor, langs):
         pdb.set_trace()
-        lang1 = tensor[]
 
     def nt_xent_loss(self,sent_embs):
         """
