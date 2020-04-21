@@ -494,12 +494,12 @@ class TransformerModel(nn.Module):
         else:
             lang_len = lang1_slen
 
-        lang1_emb = torch.zeros(lang_len, bs, tensor.shape[2])
+        lang1_emb = torch.zeros(lang_len, bs, tensor.shape[2]).cuda()
         lang1_idx = idx[:lang_len, :bs] == 0
 
         lang1_emb[lang1_idx, :] = tensor[idx == 0, :]
 
-        lang2_emb = torch.zeros(lang_len, bs, tensor.shape[2])
+        lang2_emb = torch.zeros(lang_len, bs, tensor.shape[2]).cuda()
         lang2_idx = idx[-lang_len:, :bs] == 1
         lang2_emb[lang2_idx, :] = tensor[idx == 1, :]
 
