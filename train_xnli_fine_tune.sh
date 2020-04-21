@@ -1,13 +1,13 @@
 #!/bin/bash
 
 python glue-xnli.py \
---exp_name test_xnli_mlm_tlm \
+--exp_name test_xnli_mlm_tlm_fine_tune \
 --dump_path "/content/gdrive/My Drive/NLP-project/dumped/" \
---model_path mlm_tlm_xnli15_1024.pth \
+--model_path ./best-avg_valid_tlm_ppl.pth \
 --data_path "/content/gdrive/My Drive/NLP-project/processed" \
 --transfer_tasks XNLI \
---optimizer_e sgd,lr=0.000125 \
---optimizer_p sgd,lr=0.000125 \
+--optimizer_e sgd,lr=0.00001 \
+--optimizer_p sgd,lr=0.00001 \
 --finetune_layers "0:_1" \
 --batch_size 8 \
 --n_epochs 250 \

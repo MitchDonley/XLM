@@ -18,6 +18,8 @@ from src.model.memory import HashingMemory
 from src.trainer import SingleTrainer, EncDecTrainer
 from src.evaluation.evaluator import SingleEvaluator, EncDecEvaluator
 
+import warnings
+
 
 def get_parser():
     """
@@ -313,6 +315,8 @@ def main(params):
 
 
 if __name__ == '__main__':
+
+    warnings.filterwarnings("ignore")
 
     # generate parser / parse parameters
     parser = get_parser()
