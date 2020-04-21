@@ -304,6 +304,7 @@ class TransformerModel(nn.Module):
         
         # contrastive loss
         self.use_contrastive = params.contrastive_loss
+        self.contrastive_type = params.contrastive_type
         self.temp = params.temperature
         self.contrastive = nn.Sequential(nn.Linear(self.dim, self.dim), nn.ReLU(), nn.Linear(self.dim, self.dim))
         self.lamb = params.lambda_mult
@@ -450,8 +451,11 @@ class TransformerModel(nn.Module):
         # loss_dict = {'tlm': loss.item()}
 
         if self.use_contrastive:
-            
-            sent_embs = self.get_sent_embs_max_pool(tensor, lang_emb)
+
+            if self.contrastive_type == 'first':
+                sent_embs = self.get_sent_embs(tensor, positions)
+            else:
+                sent_embs = self.get_sent_embs_max_pool(tensor, lang_emb)
             contrastive_loss = self.nt_xent_loss(sent_embs)
             loss += (self.lamb * contrastive_loss)
             # loss_dict['contrastive'] = contrastive_loss.item()
@@ -478,7 +482,7 @@ class TransformerModel(nn.Module):
         return sent_embs
 
     def get_sent_embs_max_pool(self, tensor, langs):
-        pdb.set_trace()
+        # pdb.set_trace()
         slen, bs = langs.shape
 
         lang1 = langs[0,0]
@@ -493,9 +497,9 @@ class TransformerModel(nn.Module):
             lang2_idx = idx == 1
 
         lang1_mask = langs == lang1
-        lang1_slen = (lang1_mask).sum(dim = 0).max()
+        lang1_slen = (lang1_mask).sum(dim = 0)
         lang2_mask = langs == lang2
-        lang2_slen = (lang2_mask).sum(dim = 0).max()
+        lang2_slen = (lang2_mask).sum(dim = 0)
 
         lang1_emb = torch.zeros(slen, bs, tensor.shape[2]).cuda()
 
@@ -504,7 +508,14 @@ class TransformerModel(nn.Module):
         lang2_emb = torch.zeros(slen, bs, tensor.shape[2]).cuda()
         
         for i in range(bs):
-            lang2_emb[lang2_idx[:, i], i, :] = tensor[lang2_idx[:,i], i, :]
+            lang2_emb[:lang2_slen[i].item(), i, :] = tensor[lang2_idx[:,i], i, :]
+
+        # take max over sentence length dimension
+        lang1_max = lang1_emb.max(dim=0)[0].unsqueeze(1)
+        lang2_max = lang2_emb.max(dim=0)[0].unsqueeze(1)
+        sent_embs = torch.cat((lang1_max, lang2_max), dim=1)
+
+        return sent_embs
 
     def nt_xent_loss(self,sent_embs):
         """
