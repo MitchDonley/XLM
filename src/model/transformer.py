@@ -489,19 +489,15 @@ class TransformerModel(nn.Module):
         lang2_mask = langs == lang2
         lang2_slen = (lang2_mask).sum(dim = 0).max()
 
-        if lang2_slen > lang1_slen:
-            lang_len = lang2_slen
-        else:
-            lang_len = lang1_slen
+        lang1_emb = torch.zeros(slen, bs, tensor.shape[2]).cuda()
+        lang1_idx = idx == 0
 
-        lang1_emb = torch.zeros(lang_len, bs, tensor.shape[2]).cuda()
-        lang1_idx = idx[:lang_len, :bs] == 0
+        lang1_emb[lang1_idx, :] = tensor[lang1_idx, :]
 
-        lang1_emb[lang1_idx, :] = tensor[idx == 0, :]
-
-        lang2_emb = torch.zeros(lang_len, bs, tensor.shape[2]).cuda()
-        lang2_idx = idx[-lang_len:, :bs] == 1
-        lang2_emb[lang2_idx, :] = tensor[idx == 1, :]
+        lang2_emb = torch.zeros(slen, bs, tensor.shape[2]).cuda()
+        lang2_idx = idx == 1
+        for i in range(bs):
+            lang2_emb[lang2_idx[:, i], i, :] = tensor[lang2_idx[:,i], i, :]
 
     def nt_xent_loss(self,sent_embs):
         """
