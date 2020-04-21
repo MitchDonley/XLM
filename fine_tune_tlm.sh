@@ -1,8 +1,8 @@
-python train.py \
---exp_name fine_tune_xnli_tlm_contrastive \
---dump_path "/content/gdrive/My Drive/NLP-project/dumped/" \
+python -W ignore train.py \
+--exp_name fine_tune_xnli_tlm \
+--dump_path ./dumped/ \
 --reload_model mlm_tlm_xnli15_1024.pth \
---data_path "/content/gdrive/My Drive/NLP-project/processed" \
+--data_path ./data/processed/ \
 --lgs 'ar-bg-de-el-en-es-fr-hi-ru-sw-th-tr-ur-vi-zh' \
 --clm_steps '' \
 --mlm_steps 'en-ar,en-bg,en-de,en-el,en-es,en-fr,en-hi,en-ru,en-sw,en-th,en-tr,en-ur,en-vi,en-zh,ar-en,bg-en,de-en,el-en,es-en,fr-en,hi-en,ru-en,sw-en,th-en,tr-en,ur-en,vi-en,zh-en' \
@@ -12,7 +12,6 @@ python train.py \
 --dropout 0.1 \
 --attention_dropout 0.1 \
 --gelu_activation true \
---contrastive_loss true \
 --max_vocab 95000 \
 --batch_size 32 \
 --bptt 256 \
