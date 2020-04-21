@@ -479,6 +479,18 @@ class TransformerModel(nn.Module):
 
     def get_sent_embs_max_pool(self, tensor, langs):
         pdb.set_trace()
+        slen, bs = langs.shape
+        values, idx = torch.unique(langs, return_inverse = True)
+        lang1 = values[0]
+        lang2 = values[1]
+        lang1_idx = idx[0]
+        lang2_idx = idx[1]
+
+        lang1_mask = langs == lang1
+        lang1_slen = (lang1_mask).sum(dim = 0).max()
+        lang1_emb = torch.ones(lang1_slen, bs, tensor.shape[2]) * self.pad_index
+
+        lang1_emb[lang1_idx, :] = tensor[lang1_idx, :]
 
     def nt_xent_loss(self,sent_embs):
         """
