@@ -504,7 +504,7 @@ class TransformerModel(nn.Module):
         lang2_emb = torch.zeros(slen, bs, tensor.shape[2]).cuda()
         
         for i in range(bs):
-            lang2_emb[lang2_idx[:, i], i, :] = tensor[lang2_idx[:,i], i, :]
+            lang2_emb[:lang2_slen[i], i, :] = tensor[lang2_idx[:,i], i, :]
 
     def nt_xent_loss(self,sent_embs):
         """
