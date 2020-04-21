@@ -486,7 +486,7 @@ class TransformerModel(nn.Module):
 
         lang1_mask = langs == lang1
         lang1_slen = (lang1_mask).sum(dim = 0).max()
-        ang2_mask = langs == lang2
+        lang2_mask = langs == lang2
         lang2_slen = (lang2_mask).sum(dim = 0).max()
 
         if lang2_slen > lang1_slen:
