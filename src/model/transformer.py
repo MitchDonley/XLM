@@ -306,6 +306,7 @@ class TransformerModel(nn.Module):
         self.use_contrastive = params.contrastive_loss
         self.temp = params.temperature
         self.contrastive = nn.Sequential(nn.Linear(self.dim, self.dim), nn.ReLU(), nn.Linear(self.dim, self.dim))
+        self.lamb = params.lambda_mult
 
         for layer_id in range(self.n_layers):
             self.attentions.append(MultiHeadAttention(self.n_heads, self.dim, dropout=self.attention_dropout))
@@ -435,7 +436,7 @@ class TransformerModel(nn.Module):
 
         return tensor
 
-    def predict(self, tensor, positions, pred_mask, y, get_scores):
+    def predict(self, tensor, positions, lang_emb, pred_mask, y, get_scores):
         """
         Given the last hidden state, compute word scores and/or the loss.
             `pred_mask` is a ByteTensor of shape (slen, bs), filled with 1 when
@@ -450,9 +451,9 @@ class TransformerModel(nn.Module):
 
         if self.use_contrastive:
             
-            sent_embs = self.get_sent_embs(tensor, positions)
+            sent_embs = self.get_sent_embs_max_pool(tensor, lang_emb)
             contrastive_loss = self.nt_xent_loss(sent_embs)
-            loss += contrastive_loss
+            loss += (self.lamb * contrastive_loss)
             # loss_dict['contrastive'] = contrastive_loss.item()
         # loss_dict['total'] = loss.item()
 
@@ -475,6 +476,28 @@ class TransformerModel(nn.Module):
         # Concatenate the start position embedings such that it is in the shape of (batch size, 2, embedding dim)
         sent_embs = torch.cat((sent_emb1.unsqueeze(1), sent_emb2.unsqueeze(1)), dim = 1)
         return sent_embs
+
+    def get_sent_embs_max_pool(self, tensor, langs):
+        pdb.set_trace()
+        slen, bs = langs.shape
+        values, idx = torch.unique(langs, return_inverse = True)
+        lang1 = values[0]
+        lang2 = values[1]
+
+        lang1_mask = langs == lang1
+        lang1_slen = (lang1_mask).sum(dim = 0).max()
+        lang2_mask = langs == lang2
+        lang2_slen = (lang2_mask).sum(dim = 0).max()
+
+        lang1_emb = torch.zeros(slen, bs, tensor.shape[2]).cuda()
+        lang1_idx = idx == 0
+
+        lang1_emb[lang1_idx, :] = tensor[lang1_idx, :]
+
+        lang2_emb = torch.zeros(slen, bs, tensor.shape[2]).cuda()
+        lang2_idx = idx == 1
+        for i in range(bs):
+            lang2_emb[lang2_idx[:, i], i, :] = tensor[lang2_idx[:,i], i, :]
 
     def nt_xent_loss(self,sent_embs):
         """
