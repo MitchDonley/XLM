@@ -483,14 +483,25 @@ class TransformerModel(nn.Module):
         values, idx = torch.unique(langs, return_inverse = True)
         lang1 = values[0]
         lang2 = values[1]
-        lang1_idx = idx[0]
-        lang2_idx = idx[1]
 
         lang1_mask = langs == lang1
         lang1_slen = (lang1_mask).sum(dim = 0).max()
-        lang1_emb = torch.ones(lang1_slen, bs, tensor.shape[2]) * self.pad_index
+        ang2_mask = langs == lang2
+        lang2_slen = (lang2_mask).sum(dim = 0).max()
 
-        lang1_emb[lang1_idx, :] = tensor[lang1_idx, :]
+        if lang2_slen > lang1_slen:
+            lang_len = lang2_slen
+        else:
+            lang_len = lang1_slen
+
+        lang1_emb = torch.zeros(lang_len, bs, tensor.shape[2])
+        lang1_idx = idx[:lang_len, :bs] == 0
+
+        lang1_emb[lang1_idx, :] = tensor[idx == 0, :]
+
+        lang2_emb = torch.zeros(lang_len, bs, tensor.shape[2])
+        lang2_idx = idx[-lang_len:, :bs] == 1
+        lang2_emb[lang2_idx, :] = tensor[idx == 1, :]
 
     def nt_xent_loss(self,sent_embs):
         """
