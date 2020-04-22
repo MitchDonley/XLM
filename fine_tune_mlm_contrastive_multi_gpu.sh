@@ -1,5 +1,6 @@
-python -W ignore train.py \
---exp_name fine_tune_xnli_mlm_tlm \
+export NGPU=2;
+python -W ignore -m torch.distributed.launch --nproc_per_node=$NGPU train.py \
+--exp_name fine_tune_xnli_mlm_tlm_contrastive \
 --dump_path ./dumped/ \
 --reload_model mlm_tlm_xnli15_1024.pth \
 --data_path ./data/processed/ \
@@ -12,6 +13,7 @@ python -W ignore train.py \
 --dropout 0.1 \
 --attention_dropout 0.1 \
 --gelu_activation true \
+--contrastive_loss true \
 --max_vocab 95000 \
 --batch_size 16 \
 --bptt 256 \

@@ -435,7 +435,7 @@ class TransformerModel(nn.Module):
 
         return tensor
 
-    def predict(self, tensor, positions, pred_mask, y, get_scores):
+    def predict(self, tensor, positions, langs, pred_mask, y, get_scores):
         """
         Given the last hidden state, compute word scores and/or the loss.
             `pred_mask` is a ByteTensor of shape (slen, bs), filled with 1 when
@@ -443,12 +443,12 @@ class TransformerModel(nn.Module):
             `y` is a LongTensor of shape (pred_mask.sum(),)
             `get_scores` is a boolean specifying whether we need to return scores
         """
-
+        lang1, lang2 = langs
         masked_tensor = tensor[pred_mask.unsqueeze(-1).expand_as(tensor)].view(-1, self.dim)
         scores, loss = self.pred_layer(masked_tensor, y, get_scores)
         # loss_dict = {'tlm': loss.item()}
 
-        if self.use_contrastive:
+        if self.use_contrastive and lang2 is not None:
             
             sent_embs = self.get_sent_embs(tensor, positions)
             contrastive_loss = self.nt_xent_loss(sent_embs)

@@ -1,4 +1,5 @@
-python -W ignore train.py \
+export NGPU=2;
+python -W ignore -m torch.distributed.launch --nproc_per_node=$NGPU train.py \
 --exp_name fine_tune_xnli_mlm_tlm \
 --dump_path ./dumped/ \
 --reload_model mlm_tlm_xnli15_1024.pth \
