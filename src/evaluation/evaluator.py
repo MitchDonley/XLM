@@ -304,7 +304,7 @@ class Evaluator(object):
             #print(x.shape, lengths.shape, positions.shape, pred_mask.shape, y.shape)
             # forward / loss
             tensor = model('fwd', x=x, lengths=lengths, positions=positions, langs=langs, causal=True)
-            word_scores, loss = model('predict', tensor=tensor, pred_mask=pred_mask, y=y, get_scores=True)
+            word_scores, loss = model('predict', tensor=tensor, positions=positions, lang_emb=langs, langs=(lang1,lang2), pred_mask=pred_mask, y=y, get_scores=False)
 
             # update stats
             n_words += y.size(0)
@@ -380,7 +380,8 @@ class Evaluator(object):
             #print(x.shape, y.shape, pred_mask.shape, lengths.shape, positions.shape)
             # forward / loss
             tensor = model('fwd', x=x, lengths=lengths, positions=positions, langs=langs, causal=False)
-            word_scores, loss = model('predict', tensor=tensor, positions=positions, langs=(lang1,lang2), pred_mask=pred_mask, y=y, get_scores=True)
+            word_scores, loss = model('predict', tensor=tensor, positions=positions, lang_emb=langs, langs=(lang1,lang2), pred_mask=pred_mask, y=y, get_scores=False)
+            
 
             # update stats
             n_words += len(y)
