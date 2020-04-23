@@ -4,7 +4,7 @@ import json
 import numpy as np
 import pdb
 
-parent = './dumped/test_xnli_mlm_tlm_fine_tune'
+parent = './dumped/test_xnli_tlm_fine_tune'
 
 folders = [x[0] for x in os.walk(parent) if x[0] != parent]
 scores = {}
@@ -44,7 +44,7 @@ for folder in folders:
                 scores['best']['dict'] = score_dict
 
 
-
+best_scores = {}
 for k in scores.keys():
     if k != 'best':
         print("OPTIMIZER: {}".format(str(k)))
@@ -54,11 +54,14 @@ for k in scores.keys():
             if scores[k][epoch]['avg_valid'] > max_val:
                 max_val = scores[k][epoch]['avg_valid']
                 max_dict = scores[k][epoch]
+        best_scores[k] = max_dict
         print(max_dict)
 print('==================================================')
 print("BEST SCORES: {}".format(scores['best']))
 
 
+with open(parent + '/results_best_per_optim.txt', 'w') as json_file:
+    json.dump(best_scores, json_file)
 with open(parent + '/results.txt', 'w') as json_file:
     json.dump(scores, json_file)
 with open(parent + '/results_best.txt', 'w') as json_file:
