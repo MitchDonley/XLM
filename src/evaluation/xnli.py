@@ -164,8 +164,6 @@ class XNLI:
         """
         Evaluate on XNLI validation and test sets, for all languages.
         """
-        import pdb
-        pdb.set_trace()
         params = self.params
         self.embedder.eval()
         self.proj.eval()
