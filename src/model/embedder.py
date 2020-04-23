@@ -46,10 +46,11 @@ class SentenceEmbedder(object):
         pretrain_params.embedding_type = params.embedding_type
 
         if 'contrastive_loss' not in pretrain_params:
-            pretrain_params.contrastive_type = params.contrastive_type
             pretrain_params.contrastive_loss = False
             pretrain_params.temperature = 0.1
             pretrain_params.lambda_mult = params.lambda_mult
+        if 'contrastive_type' not in pretrain_params:
+            pretrain_params.contrastive_type = 'first'
             ### NEED TO INITIALIZE STATE DICT FOR CONTRASTIVE PROJECTION ###
             # pretrain_params.contrastive.0.weight = torch.nn.init()
 
