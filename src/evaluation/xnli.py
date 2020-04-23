@@ -11,6 +11,7 @@ import copy
 import time
 import json
 from collections import OrderedDict
+from sklearn.metrics import confusion_matrix
 
 import torch
 from torch import nn
@@ -164,17 +165,18 @@ class XNLI:
         """
         Evaluate on XNLI validation and test sets, for all languages.
         """
-        import pdb
-        pdb.set_trace()
         params = self.params
         self.embedder.eval()
         self.proj.eval()
 
         scores = OrderedDict({'epoch': self.epoch})
 
+        # create confusion matrices for each language
+        conf_mats = torch.zeros((len(XNLI_LANGS), 3, 3))
+
         for splt in ['valid', 'test']:
 
-            for lang in XNLI_LANGS:
+            for land_id, lang in enumerate(XNLI_LANGS):
                 if lang not in params.lang2id:
                     continue
 
@@ -206,12 +208,19 @@ class XNLI:
                     valid += predictions.eq(y).sum().item()
                     total += len(len1)
 
+                    # add to confusion matrix
+                    if splt == 'test':
+                        mat = confusion_matrix(y.cpu(), predictions.cpu())
+                        conf_mats[lang_id] += mat
+
                 # compute accuracy
                 acc = 100.0 * valid / total
                 scores['xnli_%s_%s_acc' % (splt, lang)] = acc
                 logger.info("XNLI - %s - %s - Epoch %i - Acc: %.1f%%" % (splt, lang, self.epoch, acc))
 
         logger.info("__log__:%s" % json.dumps(scores))
+        torch.save(conf_mats, self.params.dump_path + '/conf_mats_epoch' + str(self.epoch) + '.pt')
+
         return scores
 
     def load_data(self):
