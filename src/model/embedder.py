@@ -44,6 +44,8 @@ class SentenceEmbedder(object):
         pretrain_params.unk_index = dico.index(UNK_WORD)
         pretrain_params.mask_index = dico.index(MASK_WORD)
         pretrain_params.embedding_type = params.embedding_type
+        pretrain_params.contrastive_type = params.contrastive_type
+        pretrain_params.lambda_mult = params.lambda_mult
 
         if 'contrastive_loss' not in pretrain_params:
             pretrain_params.contrastive_loss = False

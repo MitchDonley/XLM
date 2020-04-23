@@ -99,6 +99,8 @@ assert len(params.transfer_tasks) > 0
 assert all([task in TASKS for task in params.transfer_tasks])
 
 # reload pretrained model
+# import pdb
+# pdb.set_trace()
 embedder = SentenceEmbedder.reload(params.model_path, params)
 
 # reload langs from pretrained model
