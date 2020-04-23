@@ -12,6 +12,7 @@ import time
 import json
 from collections import OrderedDict
 from sklearn.metrics import confusion_matrix
+import numpy as np
 
 import torch
 from torch import nn
@@ -211,6 +212,16 @@ class XNLI:
                     # add to confusion matrix
                     if splt == 'test':
                         mat = confusion_matrix(y.cpu(), predictions.cpu())
+
+                        if not torch.cat((y, predictions)).unique().shape[0] == 3:
+                            y = y.cpu()
+                            predictions = predictions.cpu()
+                            n = np.setdiff1d(torch.tensor([0,1,2]), torch.cat((y, predictions)).unique())[0]
+                            y = torch.cat((y, torch.tensor([n])))
+                            predictions = torch.cat((predictions, torch.tensor([n])))
+                            mat = confusion_matrix(y, predictions)
+                            mat[n,n] -= 1
+
                         conf_mats[lang_id] += mat
 
                 # compute accuracy
