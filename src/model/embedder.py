@@ -47,8 +47,10 @@ class SentenceEmbedder(object):
 
         if 'contrastive_loss' not in pretrain_params:
             pretrain_params.contrastive_loss = False
+        if 'temperature' not in pretrain_params:
             pretrain_params.temperature = 0.1
-            pretrain_params.lambda_mult = params.lambda_mult
+        if 'lambda_mult' not in pretrain_params:
+            pretrain_params.lambda_mult = 1
         if 'contrastive_type' not in pretrain_params:
             pretrain_params.contrastive_type = 'first'
             ### NEED TO INITIALIZE STATE DICT FOR CONTRASTIVE PROJECTION ###
