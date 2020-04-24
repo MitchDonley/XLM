@@ -230,8 +230,7 @@ class XNLI:
                 logger.info("XNLI - %s - %s - Epoch %i - Acc: %.1f%%" % (splt, lang, self.epoch, acc))
 
         logger.info("__log__:%s" % json.dumps(scores))
-        path = os.path.join(self.params.dump_path, '/conf_mats_epoch{}.pt'.format(self.epoch))
-        torch.save(conf_mats, path)
+        torch.save(conf_mats, self.params.dump_path + '/conf_mats_epoch' + str(self.epoch) + '.pt'
 
         return scores
 
