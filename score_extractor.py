@@ -4,7 +4,7 @@ import json
 import numpy as np
 import pdb
 
-parent = './dumped/test_xnli_tlm_fine_tune'
+parent = './dumped/test_xnli_mlm_tlm_fine_tune'
 
 folders = [x[0] for x in os.walk(parent) if x[0] != parent]
 scores = {}
