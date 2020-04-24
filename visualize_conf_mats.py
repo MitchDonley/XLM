@@ -9,7 +9,7 @@ XNLI_labels = ['contradiction','neutral','entailment']
 
 # model and epoch to load from
 # model = 'test_xnli_mlm_tlm/8av043orrl/' # THIS MODEL HAS INVALID CONFUSION MATRICES!!
-model = 'test_xnli_mlm_tlm_fine_tune/e66otb8zeg/' # THIS MODEL HAS CORRECT CONFUSION MATRICES!!
+model = 'test_xnli_tlm_contrastive_max_pool/' # THIS MODEL HAS CORRECT CONFUSION MATRICES!!
 
 # load confusion matrices
 mat_files = glob.glob('./dumped/' + model + 'conf_mats_epoch*')
