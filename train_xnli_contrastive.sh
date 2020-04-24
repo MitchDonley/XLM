@@ -1,7 +1,7 @@
 #!/bin/bash
 
 python glue-xnli.py \
---exp_name test_xnli_mlm_tlm_contrastive_sgd \
+--exp_name test_xnli_tlm_contrastive \
 --dump_path "/content/gdrive/My Drive/NLP-project/dumped/" \
 --model_path ./best-avg_valid_tlm_ppl.pth \
 --data_path "/content/gdrive/My Drive/NLP-project/processed" \
