@@ -166,7 +166,7 @@ class MultiHeadAttention(nn.Module):
         self.v_lin = Linear(dim, dim)
         self.out_lin = Linear(dim, dim)
 
-    def forward(self, input, mask, kv=None, cache=None):
+    def forward(self, input, mask, kv=None, cache=None, return_attention=False):
         """
         Self-attention (if kv is None) or attention over source sentence (provided by kv).
         """
@@ -215,6 +215,10 @@ class MultiHeadAttention(nn.Module):
         scores.masked_fill_(mask, -float('inf'))                              # (bs, n_heads, qlen, klen)
 
         weights = F.softmax(scores.float(), dim=-1).type_as(scores)           # (bs, n_heads, qlen, klen)
+        if return_attention:
+            # import pdb
+            # pdb.set_trace()
+            self.attention_scores = weights.cpu().detach().numpy()
         weights = F.dropout(weights, p=self.dropout, training=self.training)  # (bs, n_heads, qlen, klen)
         context = torch.matmul(weights, v)                                    # (bs, n_heads, qlen, dim_per_head)
         context = unshape(context)                                            # (bs, qlen, dim)
@@ -336,6 +340,8 @@ class TransformerModel(nn.Module):
             return self.fwd(**kwargs)
         elif mode == 'predict':
             return self.predict(**kwargs)
+        elif mode == 'return_attention':
+            return self.get_attention_scores(**kwargs)
         else:
             raise Exception("Unknown mode: %s" % mode)
 
@@ -436,6 +442,83 @@ class TransformerModel(nn.Module):
 
 
         return tensor
+
+    def get_attention_scores(self, x, lengths, causal, src_enc=None, src_len=None, positions=None, langs=None, cache=None, return_attention=True):
+        attention_scores = []
+
+        slen, bs = x.size()
+        assert lengths.size(0) == bs
+        assert lengths.max().item() <= slen
+        x = x.transpose(0, 1)  # batch size as dimension 0
+        assert (src_enc is None) == (src_len is None)
+        if src_enc is not None:
+            assert self.is_decoder
+            assert src_enc.size(0) == bs
+
+        # generate masks
+        mask, attn_mask = get_masks(slen, lengths, causal)
+        if self.is_decoder and src_enc is not None:
+            src_mask = torch.arange(src_len.max(), dtype=torch.long, device=lengths.device) < src_len[:, None]
+
+        # positions
+        if positions is None:
+            positions = x.new(slen).long()
+            positions = torch.arange(slen, out=positions).unsqueeze(0)
+        else:
+            assert positions.size() == (slen, bs)
+            positions = positions.transpose(0, 1)
+
+        # langs
+        if langs is not None:
+            assert langs.size() == (slen, bs)
+            langs = langs.transpose(0, 1)
+
+        # do not recompute cached elements
+        if cache is not None:
+            _slen = slen - cache['slen']
+            x = x[:, -_slen:]
+            positions = positions[:, -_slen:]
+            if langs is not None:
+                langs = langs[:, -_slen:]
+            mask = mask[:, -_slen:]
+            attn_mask = attn_mask[:, -_slen:]
+
+        # embeddings
+        tensor = self.embeddings(x)
+        tensor = tensor + self.position_embeddings(positions).expand_as(tensor)
+        if langs is not None and self.use_lang_emb:
+            tensor = tensor + self.lang_embeddings(langs)
+        tensor = self.layer_norm_emb(tensor)
+        tensor = F.dropout(tensor, p=self.dropout, training=self.training)
+        tensor *= mask.unsqueeze(-1).to(tensor.dtype)
+
+        # transformer layers
+        for i in range(self.n_layers):
+
+            # self attention
+            attn = self.attentions[i](tensor, attn_mask, cache=cache, return_attention=True)
+            attn = F.dropout(attn, p=self.dropout, training=self.training)
+            tensor = tensor + attn
+            tensor = self.layer_norm1[i](tensor)
+
+            # FFN
+            if ('%i_in' % i) in self.memories:
+                tensor = tensor + self.memories['%i_in' % i](tensor)
+            else:
+                tensor = tensor + self.ffns[i](tensor)
+            tensor = self.layer_norm2[i](tensor)
+
+            # memory
+            if ('%i_after' % i) in self.memories:
+                tensor = tensor + self.memories['%i_after' % i](tensor)
+
+            tensor *= mask.unsqueeze(-1).to(tensor.dtype)
+
+            attention_scores.append(self.attentions[i].attention_scores)
+
+        return attention_scores
+
+
 
     def predict(self, tensor, positions, lang_emb, pred_mask, y, get_scores):
         """
