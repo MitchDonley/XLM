@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+#python -W ignore visualize_attention_weights.py --data_path ./data/processed/XLM15 --model_path ./models/mlm_tlm_xnli15_1024.pth --contrastive_type max --lambda_mult 1 --embedding_type first
+#python -W ignore visualize_attention_weights.py --exp_name baseline --dump_path ./dumped/ --model_path ./models/mlm_tlm_xnli15_1024.pth --data_path ./data/processed/XLM15 --transfer_tasks XNLI --optimizer_e sgd,lr=0.000125 --optimizer_p sgd,lr=0.000125 --finetune_layers "0:_1" --contrastive_type max --lambda_mult 1 --embedding_type first --batch_size 8 --n_epochs 20 --epoch_size 20000 --max_len 256 --max_vocab 95000
+
+#python -W ignore visualize_attention_weights.py --exp_name tlm --dump_path ./dumped/ --model_path ./models/tlm.pth --data_path ./data/processed/XLM15 --transfer_tasks XNLI --optimizer_e sgd,lr=0.000125 --optimizer_p sgd,lr=0.000125 --finetune_layers "0:_1" --contrastive_type max --lambda_mult 1 --embedding_type first --batch_size 8 --n_epochs 20 --epoch_size 20000 --max_len 256 --max_vocab 95000
+
+#python -W ignore visualize_attention_weights.py --exp_name tlm-contrastive --dump_path ./dumped/ --model_path ./models/tlm-contrastive.pth --data_path ./data/processed/XLM15 --transfer_tasks XNLI --optimizer_e sgd,lr=0.000125 --optimizer_p sgd,lr=0.000125 --finetune_layers "0:_1" --contrastive_type max --lambda_mult 1 --embedding_type first --batch_size 8 --n_epochs 20 --epoch_size 20000 --max_len 256 --max_vocab 95000
+#
+#python -W ignore visualize_attention_weights.py --exp_name tlm-mlm --dump_path ./dumped/ --model_path ./models/tlm-mlm.pth --data_path ./data/processed/XLM15 --transfer_tasks XNLI --optimizer_e sgd,lr=0.000125 --optimizer_p sgd,lr=0.000125 --finetune_layers "0:_1" --contrastive_type max --lambda_mult 1 --embedding_type first --batch_size 8 --n_epochs 20 --epoch_size 20000 --max_len 256 --max_vocab 95000
+
+python -W ignore visualize_attention_weights.py --exp_name tlm-mlm-contrastive --dump_path ./dumped/ --model_path ./models/tlm-mlm-contrastive.pth --data_path ./data/processed/XLM15 --transfer_tasks XNLI --optimizer_e sgd,lr=0.000125 --optimizer_p sgd,lr=0.000125 --finetune_layers "0:_1" --contrastive_type max --lambda_mult 1 --embedding_type first --batch_size 8 --n_epochs 20 --epoch_size 20000 --max_len 256 --max_vocab 95000
