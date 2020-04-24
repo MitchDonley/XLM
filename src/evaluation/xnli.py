@@ -11,6 +11,8 @@ import copy
 import time
 import json
 from collections import OrderedDict
+from sklearn.metrics import confusion_matrix
+import numpy as np
 
 import torch
 from torch import nn
@@ -170,9 +172,12 @@ class XNLI:
 
         scores = OrderedDict({'epoch': self.epoch})
 
+        # create confusion matrices for each language
+        conf_mats = torch.zeros((len(XNLI_LANGS), 3, 3))
+
         for splt in ['valid', 'test']:
 
-            for lang in XNLI_LANGS:
+            for land_id, lang in enumerate(XNLI_LANGS):
                 if lang not in params.lang2id:
                     continue
 
@@ -204,15 +209,92 @@ class XNLI:
                     valid += predictions.eq(y).sum().item()
                     total += len(len1)
 
+                    # add to confusion matrix
+                    if splt == 'test':
+                        mat = confusion_matrix(y.cpu(), predictions.cpu())
+
+                        if not torch.cat((y, predictions)).unique().shape[0] == 3:
+                            y = y.cpu()
+                            predictions = predictions.cpu()
+                            n = np.setdiff1d(torch.tensor([0,1,2]), torch.cat((y, predictions)).unique())[0]
+                            y = torch.cat((y, torch.tensor([n])))
+                            predictions = torch.cat((predictions, torch.tensor([n])))
+                            mat = confusion_matrix(y, predictions)
+                            mat[n,n] -= 1
+
+                        conf_mats[lang_id] += mat
+
                 # compute accuracy
                 acc = 100.0 * valid / total
                 scores['xnli_%s_%s_acc' % (splt, lang)] = acc
                 logger.info("XNLI - %s - %s - Epoch %i - Acc: %.1f%%" % (splt, lang, self.epoch, acc))
 
         logger.info("__log__:%s" % json.dumps(scores))
+        torch.save(conf_mats, self.params.dump_path + '/conf_mats_epoch' + str(self.epoch) + '.pt')
+
         return scores
 
-    def load_data(self):
+    def save_attention_scores(self):
+        # gets attention scores for one batch of each language
+
+        params = self.params
+
+        # load data
+        self.data = self.load_data(split='test')
+        if not self.data['dico'] == self._embedder.dico:
+            raise Exception(("Dictionary in evaluation data (%i words) seems different than the one " +
+                             "in the pretrained model (%i words). Please verify you used the same dictionary, " +
+                             "and the same values for max_vocab and min_count.") % (
+                            len(self.data['dico']), len(self._embedder.dico)))
+
+        # embedder
+        self.embedder = copy.deepcopy(self._embedder)
+        self.embedder.cuda()
+
+        # projection layer
+        self.proj = nn.Sequential(*[
+            nn.Dropout(params.dropout),
+            nn.Linear(self.embedder.out_dim, 3)
+        ]).cuda()
+
+        params = self.params
+        self.embedder.eval()
+        self.proj.eval()
+
+        attention_scores = {}
+        sentences = {}
+        for land_id, lang in enumerate(XNLI_LANGS):
+            if lang not in params.lang2id:
+                continue
+
+            lang_id = params.lang2id[lang]
+
+            splt = 'test'
+            for batch in self.get_iterator(splt, lang):
+                # batch
+                (sent1, len1), (sent2, len2), idx = batch
+                x, lengths, positions, langs = concat_batches(
+                    sent1, len1, lang_id,
+                    sent2, len2, lang_id,
+                    params.pad_index,
+                    params.eos_index,
+                    reset_positions=False
+                )
+                y = self.data[lang][splt]['y'][idx]
+                sentences[lang] = x
+
+                # cuda
+                x, y, lengths, positions, langs = to_cuda(x, y, lengths, positions, langs)
+
+                # forward
+                # output = self.proj(self.embedder.get_embeddings(x, lengths, positions, langs))
+                attention_scores[lang] = self.embedder.model('return_attention', x=x, lengths=lengths, positions=positions, langs=langs, causal=False, return_attention=True)
+                break
+
+        return sentences, attention_scores
+
+
+    def load_data(self, split=None):
         """
         Load XNLI cross-lingual classification data.
         """
@@ -221,7 +303,12 @@ class XNLI:
         label2id = {'contradiction': 0, 'neutral': 1, 'entailment': 2}
         dpath = os.path.join(params.data_path, 'eval', 'XNLI')
 
-        for splt in ['train', 'valid', 'test']:
+        if split == None:
+            splits = ['train', 'valid', 'test']
+        else:
+            splits = [split]
+
+        for splt in splits:
 
             for lang in XNLI_LANGS:
 

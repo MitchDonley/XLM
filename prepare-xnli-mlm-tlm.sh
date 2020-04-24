@@ -27,8 +27,8 @@ FASTBPE=$TOOLS_PATH/fastBPE/fast
 
 
 # Get BPE codes and vocab
-#wget -c https://dl.fbaipublicfiles.com/XLM/codes_xnli_15 -P $MAIN_PATH
-#wget -c https://dl.fbaipublicfiles.com/XLM/vocab_xnli_15 -P $MAIN_PATH
+wget -c https://dl.fbaipublicfiles.com/XLM/codes_xnli_15 -P $MAIN_PATH
+wget -c https://dl.fbaipublicfiles.com/XLM/vocab_xnli_15 -P $MAIN_PATH
 
 
 ## Prepare monolingual data

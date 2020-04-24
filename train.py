@@ -152,8 +152,12 @@ def get_parser():
                         help="Accumulate model gradients over N iterations (N times larger batch sizes)")
     parser.add_argument("--contrastive_loss", type=bool_flag, default=False,
                         help="Enforce contrastive learning on encoder embeddings (only for TLM)")
+    parser.add_argument("--contrastive_type", type=str, default="first",
+                        help="Type of sentence embeddings")
     parser.add_argument("--temperature", type=float, default=0.1,
                         help="Temperature value used in nt-xent loss")
+    parser.add_argument("--lambda_mult", type=float, default=1,
+                        help="Multiplier for the nt-xent loss")
 
     # training coefficients
     parser.add_argument("--lambda_mlm", type=str, default="1",

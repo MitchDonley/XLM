@@ -71,6 +71,12 @@ parser.add_argument("--n_epochs", type=int, default=100,
                     help="Maximum number of epochs")
 parser.add_argument("--epoch_size", type=int, default=-1,
                     help="Epoch size (-1 for full pass over the dataset)")
+parser.add_argument("--contrastive_type", type=str, default="first",
+                        help="Type of sentence embeddings during contrastive learning")
+parser.add_argument("--lambda_mult", type=float, default=1,
+                        help="Multiplier for the nt-xent loss")
+parser.add_argument("--embedding_type", type=str, default="first",
+                        help="Type of sentence embeddings for down stream task")
 
 # debug
 parser.add_argument("--debug_train", type=bool_flag, default=False,

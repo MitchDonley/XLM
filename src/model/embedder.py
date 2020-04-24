@@ -27,7 +27,7 @@ class SentenceEmbedder(object):
         Create a sentence embedder from a pretrained model.
         """
         # reload model
-        reloaded = torch.load(path)
+        reloaded = torch.load(path, map_location=torch.device('cuda:0'))
         state_dict = reloaded['model']
 
         # handle models from multi-GPU checkpoints
@@ -43,10 +43,18 @@ class SentenceEmbedder(object):
         pretrain_params.pad_index = dico.index(PAD_WORD)
         pretrain_params.unk_index = dico.index(UNK_WORD)
         pretrain_params.mask_index = dico.index(MASK_WORD)
+        pretrain_params.embedding_type = params.embedding_type
+        pretrain_params.contrastive_type = params.contrastive_type
+        pretrain_params.lambda_mult = params.lambda_mult
 
         if 'contrastive_loss' not in pretrain_params:
             pretrain_params.contrastive_loss = False
+        if 'temperature' not in pretrain_params:
             pretrain_params.temperature = 0.1
+        if 'lambda_mult' not in pretrain_params:
+            pretrain_params.lambda_mult = 1
+        if 'contrastive_type' not in pretrain_params:
+            pretrain_params.contrastive_type = 'first'
             ### NEED TO INITIALIZE STATE DICT FOR CONTRASTIVE PROJECTION ###
             # pretrain_params.contrastive.0.weight = torch.nn.init()
 
@@ -145,5 +153,9 @@ class SentenceEmbedder(object):
         tensor = self.model('fwd', x=x, lengths=lengths, positions=positions, langs=langs, causal=False)
         assert tensor.size() == (slen, bs, self.out_dim)
 
-        # single-vector sentence representation (first column of last layer)
-        return tensor[0]
+        if self.pretrain_params['embedding_type'] == 'first':
+            # single-vector sentence representation (first column of last layer)
+            return tensor[0]
+        elif self.pretrain_params['embedding_type'] == 'max':
+            # take the max over the sentence length dimension
+            return tensor.max(dim=0)[0]

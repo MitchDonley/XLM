@@ -166,7 +166,7 @@ class MultiHeadAttention(nn.Module):
         self.v_lin = Linear(dim, dim)
         self.out_lin = Linear(dim, dim)
 
-    def forward(self, input, mask, kv=None, cache=None):
+    def forward(self, input, mask, kv=None, cache=None, return_attention=False):
         """
         Self-attention (if kv is None) or attention over source sentence (provided by kv).
         """
@@ -215,6 +215,10 @@ class MultiHeadAttention(nn.Module):
         scores.masked_fill_(mask, -float('inf'))                              # (bs, n_heads, qlen, klen)
 
         weights = F.softmax(scores.float(), dim=-1).type_as(scores)           # (bs, n_heads, qlen, klen)
+        if return_attention:
+            # import pdb
+            # pdb.set_trace()
+            self.attention_scores = weights.cpu().detach().numpy()
         weights = F.dropout(weights, p=self.dropout, training=self.training)  # (bs, n_heads, qlen, klen)
         context = torch.matmul(weights, v)                                    # (bs, n_heads, qlen, dim_per_head)
         context = unshape(context)                                            # (bs, qlen, dim)
@@ -304,8 +308,10 @@ class TransformerModel(nn.Module):
         
         # contrastive loss
         self.use_contrastive = params.contrastive_loss
+        self.contrastive_type = params.contrastive_type
         self.temp = params.temperature
         self.contrastive = nn.Sequential(nn.Linear(self.dim, self.dim), nn.ReLU(), nn.Linear(self.dim, self.dim))
+        self.lamb = params.lambda_mult
 
         for layer_id in range(self.n_layers):
             self.attentions.append(MultiHeadAttention(self.n_heads, self.dim, dropout=self.attention_dropout))
@@ -334,6 +340,8 @@ class TransformerModel(nn.Module):
             return self.fwd(**kwargs)
         elif mode == 'predict':
             return self.predict(**kwargs)
+        elif mode == 'return_attention':
+            return self.get_attention_scores(**kwargs)
         else:
             raise Exception("Unknown mode: %s" % mode)
 
@@ -435,7 +443,82 @@ class TransformerModel(nn.Module):
 
         return tensor
 
-    def predict(self, tensor, positions, pred_mask, y, get_scores):
+    def get_attention_scores(self, x, lengths, causal, src_enc=None, src_len=None, positions=None, langs=None, cache=None, return_attention=True):
+        attention_scores = []
+
+        slen, bs = x.size()
+        assert lengths.size(0) == bs
+        assert lengths.max().item() <= slen
+        x = x.transpose(0, 1)  # batch size as dimension 0
+        assert (src_enc is None) == (src_len is None)
+        if src_enc is not None:
+            assert self.is_decoder
+            assert src_enc.size(0) == bs
+
+        # generate masks
+        mask, attn_mask = get_masks(slen, lengths, causal)
+        if self.is_decoder and src_enc is not None:
+            src_mask = torch.arange(src_len.max(), dtype=torch.long, device=lengths.device) < src_len[:, None]
+
+        # positions
+        if positions is None:
+            positions = x.new(slen).long()
+            positions = torch.arange(slen, out=positions).unsqueeze(0)
+        else:
+            assert positions.size() == (slen, bs)
+            positions = positions.transpose(0, 1)
+
+        # langs
+        if langs is not None:
+            assert langs.size() == (slen, bs)
+            langs = langs.transpose(0, 1)
+
+        # do not recompute cached elements
+        if cache is not None:
+            _slen = slen - cache['slen']
+            x = x[:, -_slen:]
+            positions = positions[:, -_slen:]
+            if langs is not None:
+                langs = langs[:, -_slen:]
+            mask = mask[:, -_slen:]
+            attn_mask = attn_mask[:, -_slen:]
+
+        # embeddings
+        tensor = self.embeddings(x)
+        tensor = tensor + self.position_embeddings(positions).expand_as(tensor)
+        if langs is not None and self.use_lang_emb:
+            tensor = tensor + self.lang_embeddings(langs)
+        tensor = self.layer_norm_emb(tensor)
+        tensor = F.dropout(tensor, p=self.dropout, training=self.training)
+        tensor *= mask.unsqueeze(-1).to(tensor.dtype)
+
+        # transformer layers
+        for i in range(self.n_layers):
+
+            # self attention
+            attn = self.attentions[i](tensor, attn_mask, cache=cache, return_attention=True)
+            attn = F.dropout(attn, p=self.dropout, training=self.training)
+            tensor = tensor + attn
+            tensor = self.layer_norm1[i](tensor)
+
+            # FFN
+            if ('%i_in' % i) in self.memories:
+                tensor = tensor + self.memories['%i_in' % i](tensor)
+            else:
+                tensor = tensor + self.ffns[i](tensor)
+            tensor = self.layer_norm2[i](tensor)
+
+            # memory
+            if ('%i_after' % i) in self.memories:
+                tensor = tensor + self.memories['%i_after' % i](tensor)
+
+            tensor *= mask.unsqueeze(-1).to(tensor.dtype)
+
+            attention_scores.append(self.attentions[i].attention_scores)
+
+        return attention_scores
+
+    def predict(self, tensor, positions, lang_emb, langs, pred_mask, y, get_scores):
         """
         Given the last hidden state, compute word scores and/or the loss.
             `pred_mask` is a ByteTensor of shape (slen, bs), filled with 1 when
@@ -443,16 +526,19 @@ class TransformerModel(nn.Module):
             `y` is a LongTensor of shape (pred_mask.sum(),)
             `get_scores` is a boolean specifying whether we need to return scores
         """
-
+        lang1, lang2 = langs
         masked_tensor = tensor[pred_mask.unsqueeze(-1).expand_as(tensor)].view(-1, self.dim)
         scores, loss = self.pred_layer(masked_tensor, y, get_scores)
         # loss_dict = {'tlm': loss.item()}
 
-        if self.use_contrastive:
-            
-            sent_embs = self.get_sent_embs(tensor, positions)
+        if self.use_contrastive and lang2 is not None:
+
+            if self.contrastive_type == 'first':
+                sent_embs = self.get_sent_embs(tensor, positions)
+            else:
+                sent_embs = self.get_sent_embs_max_pool(tensor, lang_emb)
             contrastive_loss = self.nt_xent_loss(sent_embs)
-            loss += contrastive_loss
+            loss += (self.lamb * contrastive_loss)
             # loss_dict['contrastive'] = contrastive_loss.item()
         # loss_dict['total'] = loss.item()
 
@@ -474,6 +560,42 @@ class TransformerModel(nn.Module):
 
         # Concatenate the start position embedings such that it is in the shape of (batch size, 2, embedding dim)
         sent_embs = torch.cat((sent_emb1.unsqueeze(1), sent_emb2.unsqueeze(1)), dim = 1)
+        return sent_embs
+
+    def get_sent_embs_max_pool(self, tensor, langs):
+        # pdb.set_trace()
+        slen, bs = langs.shape
+
+        lang1 = langs[0,0]
+        lang2 = langs[-1,-1]
+
+        values, idx = torch.unique(langs, return_inverse = True)
+        if lang2 != values[1]:
+            lang1_idx = idx == 1
+            lang2_idx = idx == 0
+        else:
+            lang1_idx = idx == 0
+            lang2_idx = idx == 1
+
+        lang1_mask = langs == lang1
+        lang1_slen = (lang1_mask).sum(dim = 0)
+        lang2_mask = langs == lang2
+        lang2_slen = (lang2_mask).sum(dim = 0)
+
+        lang1_emb = torch.zeros(slen, bs, tensor.shape[2]).cuda()
+
+        lang1_emb[lang1_idx, :] = tensor[lang1_idx, :]
+
+        lang2_emb = torch.zeros(slen, bs, tensor.shape[2]).cuda()
+        
+        for i in range(bs):
+            lang2_emb[:lang2_slen[i].item(), i, :] = tensor[lang2_idx[:,i], i, :]
+
+        # take max over sentence length dimension
+        lang1_max = lang1_emb.max(dim=0)[0].unsqueeze(1)
+        lang2_max = lang2_emb.max(dim=0)[0].unsqueeze(1)
+        sent_embs = torch.cat((lang1_max, lang2_max), dim=1)
+
         return sent_embs
 
     def nt_xent_loss(self,sent_embs):
